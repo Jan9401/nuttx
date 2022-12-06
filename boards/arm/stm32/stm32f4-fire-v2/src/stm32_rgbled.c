@@ -35,7 +35,7 @@
 #include "chip.h"
 #include "arm_internal.h"
 #include "stm32_pwm.h"
-#include "stm32f4discovery.h"
+#include "stm32f4-fire-v2.h"
 
 /****************************************************************************
  * Pre-processor Definitions

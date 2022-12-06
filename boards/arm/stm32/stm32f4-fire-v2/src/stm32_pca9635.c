@@ -36,7 +36,7 @@
 
 #include "stm32_gpio.h"
 #include "stm32_i2c.h"
-#include "stm32f4discovery.h"
+#include "stm32f4-fire-v2.h"
 
 #ifdef CONFIG_PCA9635PW
 

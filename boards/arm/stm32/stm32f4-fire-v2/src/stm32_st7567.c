@@ -38,7 +38,7 @@
 #include "arm_internal.h"
 #include "stm32_gpio.h"
 #include "stm32_spi.h"
-#include "stm32f4discovery.h"
+#include "stm32f4-fire-v2.h"
 
 #ifdef CONFIG_LCD_ST7567
 

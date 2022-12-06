@@ -32,7 +32,7 @@
 #include <nuttx/wireless/bluetooth/bt_uart.h>
 
 #include "stm32_hciuart.h"
-#include "stm32f4discovery.h"
+#include "stm32f4-fire-v2.h"
 
 #include <arch/board/board.h>
 

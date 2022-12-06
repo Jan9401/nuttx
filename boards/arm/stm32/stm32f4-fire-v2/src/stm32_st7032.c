@@ -31,7 +31,7 @@
 #include <nuttx/lcd/st7032.h>
 
 #include "stm32.h"
-#include "stm32f4discovery.h"
+#include "stm32f4-fire-v2.h"
 
 #if defined(CONFIG_I2C) && defined(CONFIG_STM32_I2C1) && \
     defined(CONFIG_LCD_ST7032)

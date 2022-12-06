@@ -34,7 +34,7 @@
 #include "stm32_gpio.h"
 #include "stm32_spi.h"
 
-#include "stm32f4discovery.h"
+#include "stm32f4-fire-v2.h"
 
 #ifdef CONFIG_LCD_UG2864HSWEG01
 
@@ -79,7 +79,7 @@
  * -------------------------------------------------------------------------
  */
 
-/* Definitions in stm32f4discovery.h */
+/* Definitions in stm32f4-fire-v2.h */
 
 /****************************************************************************
  * Public Functions

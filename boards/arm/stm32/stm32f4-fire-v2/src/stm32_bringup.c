@@ -58,11 +58,11 @@
 #include "stm32_apds9960.h"
 #endif
 
-#include "stm32f4discovery.h"
+#include "stm32f4-fire-v2.h"
 
-/* Conditional logic in stm32f4discovery.h will determine if certain features
+/* Conditional logic in stm32f4-fire-v2.h will determine if certain features
  * are supported.  Tests for these features need to be made after including
- * stm32f4discovery.h.
+ * stm32f4-fire-v2.h.
  */
 
 #ifdef HAVE_RTC_DRIVER

@@ -28,7 +28,7 @@
 #include <debug.h>
 
 #include "stm32_tim.h"
-#include "stm32f4discovery.h"
+#include "stm32f4-fire-v2.h"
 
 #ifdef CONFIG_TIMER
 

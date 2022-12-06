@@ -39,7 +39,7 @@
 #include "stm32_exti.h"
 #include "stm32_spi.h"
 
-#include "stm32f4discovery.h"
+#include "stm32f4-fire-v2.h"
 
 /****************************************************************************
  * Pre-processor Definitions

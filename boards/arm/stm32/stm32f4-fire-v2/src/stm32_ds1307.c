@@ -33,7 +33,7 @@
 
 #include "stm32.h"
 #include "stm32_i2c.h"
-#include "stm32f4discovery.h"
+#include "stm32f4-fire-v2.h"
 
 #if defined(CONFIG_I2C) && defined(CONFIG_RTC_DS1307)
 

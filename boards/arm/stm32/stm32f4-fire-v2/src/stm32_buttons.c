@@ -32,7 +32,7 @@
 #include <arch/board/board.h>
 
 #include "stm32.h"
-#include "stm32f4discovery.h"
+#include "stm32f4-fire-v2.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 
