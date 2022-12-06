@@ -3,10 +3,10 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-if ARCH_BOARD_STM32F4_DISCOVERY
+if ARCH_BOARD_STM32F4_FIRE_V2
 
 config STM32F4DISBB
-	bool "STM32F4DIS-BB base board"
+	bool "STM32F4_FIRE_V2 board"
 	default n
 	---help---
 		Select if you are using the STM32F4DIS-BB base board with the
