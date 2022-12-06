@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32_STM32F4DISCOVERY_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32_STM32F4DISCOVERY_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32_STM32F4_FIRE_V2_H
+#define __BOARDS_ARM_STM32_STM32F4_FIRE_V2_H
 
 /****************************************************************************
  * Included Files
@@ -242,18 +242,10 @@
 
 /* USART1 */
 
-#ifdef CONFIG_USART1_RS485
-  /* Lets use for RS485 on pins: PB6 and PB7 */
+/* Lets use for console shell usart1 PA9 PA10 */
 
-#  define GPIO_USART1_TX        GPIO_USART1_TX_2
-#  define GPIO_USART1_RX        GPIO_USART1_RX_2
-
-  /* RS485 DIR pin: PA15 */
-
-#  define GPIO_USART1_RS485_DIR (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz |\
-                               GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN15)
-
-#endif
+#  define GPIO_USART1_TX        GPIO_USART1_TX_1
+#  define GPIO_USART1_RX        GPIO_USART1_RX_1
 
 /* USART2:
  *
@@ -265,12 +257,10 @@
  * STM32F4DIS-BB.
  */
 
-#ifndef CONFIG_STM32F4DISBB
 #  define GPIO_USART2_RX  GPIO_USART2_RX_1     /* PA3, P1 pin 13 */
 #  define GPIO_USART2_TX  GPIO_USART2_TX_1     /* PA2, P1 pin 14 */
 #  define GPIO_USART2_CTS GPIO_USART2_CTS_1    /* PA0, P1 pin 11 */
 #  define GPIO_USART2_RTS GPIO_USART2_RTS_1    /* PA1, P1 pin 12 (conflict with USER button) */
-#endif
 
 /* USART3:
  *
@@ -392,9 +382,9 @@
 
 /* Ethernet *****************************************************************/
 
-#if defined(CONFIG_STM32F4DISBB) && defined(CONFIG_STM32_ETHMAC)
   /* RMII interface to the LAN8720 PHY */
 
+#if defined(CONFIG_STM32F4_FIRE_V2) && defined(CONFIG_STM32_ETHMAC)
 #  ifndef CONFIG_STM32_RMII
 #    error CONFIG_STM32_RMII must be defined
 #  endif
@@ -404,6 +394,7 @@
 #  ifndef CONFIG_STM32_RMII_EXTCLK
 #    error CONFIG_STM32_RMII_EXTCLK must be defined
 #  endif
+#endif
 
   /* Pin disambiguation */
 
@@ -412,7 +403,6 @@
 #  define GPIO_ETH_RMII_TXD1  GPIO_ETH_RMII_TXD1_1
 #  define GPIO_ETH_PPS_OUT    GPIO_ETH_PPS_OUT_1
 
-#endif
 
 #ifdef CONFIG_MMCSD_SPI
 #define GPIO_MMCSD_NSS    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
@@ -467,4 +457,4 @@
 
 #define BOARD_XEN1210_PWMTIMER   1
 
-#endif /* __BOARDS_ARM_STM32_STM32F4DISCOVERY_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32_STM32F4-FIRE_V2_H*/
