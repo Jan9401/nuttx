@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/assert/lib_assert.c
+ * arch/xtensa/src/esp32s3/esp32s3_userspace.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,21 +18,52 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_USERSPACE_H
+#define __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_USERSPACE_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/arch.h>
-
-#include <assert.h>
-#include <stdlib.h>
+#include <nuttx/config.h>
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
-void _assert(FAR const char *filename, int linenum)
-{
-  up_assert(filename, linenum);
-  exit(EXIT_FAILURE);
-}
+/****************************************************************************
+ * Name: esp32s3_userspace
+ *
+ * Description:
+ *   For the case of the separate user-/kernel-space build, perform whatever
+ *   platform specific initialization of the user memory is required.
+ *   Normally this just means initializing the user space .data and .bss
+ *   segments.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_PROTECTED
+void esp32s3_userspace(void);
+#endif
+
+/****************************************************************************
+ * Name: esp32s3_pmsirqinitialize
+ *
+ * Description:
+ *   Initialize interrupt handler for the PMS violation ISR.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_PROTECTED
+void esp32s3_pmsirqinitialize(void);
+#else
+#  define esp32s3_pmsirqinitialize()
+#endif
+
+#endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_USERSPACE_H */
