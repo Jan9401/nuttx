@@ -128,12 +128,12 @@
 
 /* SPI
  *
- * There are sensors on SPI1, and SPI2 is connected to the FRAM.
+ * There are spi_flash on SPI1.
  */
 
-#define GPIO_SPI1_MISO   GPIO_SPI1_MISO_1
-#define GPIO_SPI1_MOSI   GPIO_SPI1_MOSI_1
-#define GPIO_SPI1_SCK    GPIO_SPI1_SCK_1
+#define GPIO_SPI1_MISO   GPIO_SPI1_MISO_2
+#define GPIO_SPI1_MOSI   GPIO_SPI1_MOSI_2
+#define GPIO_SPI1_SCK    GPIO_SPI1_SCK_2
 
 #define GPIO_SPI2_MISO   GPIO_SPI2_MISO_1
 #define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1

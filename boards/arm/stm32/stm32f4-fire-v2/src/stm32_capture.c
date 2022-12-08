@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32_capture.c
+ * boards/arm/stm32/stm32f4-fire-v2/src/stm32_capture.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -35,7 +35,7 @@
 #include "stm32_capture.h"
 #include "arm_internal.h"
 
-#include "stm32f4-fire-v2.h"
+#include "stm32f4_fire_v2.h"
 
 #if defined(CONFIG_CAPTURE)
 /****************************************************************************
@@ -44,7 +44,7 @@
 
 /* Capture
  *
- * The stm32f4-fire-v2.has no real on-board pwm capture devices, but the
+ * The stm32f4_fire_v2.has no real on-board pwm capture devices, but the
  * board can be configured to capture pwm using TIM3 CH2 PB5.
  */
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32_rgbled.c
+ * boards/arm/stm32/stm32f4-fire-v2/src/stm32_rgbled.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -35,7 +35,7 @@
 #include "chip.h"
 #include "arm_internal.h"
 #include "stm32_pwm.h"
-#include "stm32f4-fire-v2.h"
+#include "stm32f4_fire_v2.h"
 
 /****************************************************************************
  * Pre-processor Definitions

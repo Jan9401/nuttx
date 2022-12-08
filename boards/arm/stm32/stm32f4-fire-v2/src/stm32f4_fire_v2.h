@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32f4discovery.h
+ * boards/arm/stm32/stm32f4-fire-v2/src/stm32f4-fire-v2.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -263,7 +263,7 @@
 /* SPI chip selects */
 
 #define GPIO_CS_MEMS      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                           GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN3)
+                           GPIO_OUTPUT_SET|GPIO_PORTG|GPIO_PIN6)
 
 #define GPIO_MAX31855_CS  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN8)
@@ -444,7 +444,7 @@ int stm32_bringup(void);
  * Name: stm32_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the stm32f4discovery
+ *   Called to configure SPI chip select GPIO pins for the stm32f4-fire-v2
  *   board.
  *
  ****************************************************************************/
@@ -455,7 +455,7 @@ void weak_function stm32_spidev_initialize(void);
  * Name: stm32_i2sdev_initialize
  *
  * Description:
- *   Called to configure I2S chip select GPIO pins for the stm32f4discovery
+ *   Called to configure I2S chip select GPIO pins for the stm32f4-fire-v2
  *   board.
  *
  ****************************************************************************/
@@ -467,7 +467,7 @@ void weak_function stm32_i2sdev_initialize(void);
  *
  * Description:
  *   Called to configure an I2C and to register BH1750FVI for the
- *   stm32f4discovery board.
+ *   stm32f4-fire-v2 board.
  *
  ****************************************************************************/
 
@@ -907,6 +907,18 @@ int stm32_gs2200m_initialize(const char *devpath, int bus);
 
 #ifdef CONFIG_INPUT_DJOYSTICK
 int stm32_djoy_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_w25initialize
+ *
+ * Description:
+ *   Initialize and register the W25 FLASH file system.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_W25
+int stm32_w25initialize(int minor);
 #endif
 
 #endif /* __ASSEMBLY__ */

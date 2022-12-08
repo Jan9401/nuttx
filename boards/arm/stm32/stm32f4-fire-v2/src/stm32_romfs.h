@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32_romfs.h
+ * boards/arm/stm32/stm32f4-fire-v2/src/stm32_romfs.h
  *
  *   Copyright (C) 2017 Tomasz Wozniak. All rights reserved.
  *   Author: Tomasz Wozniak <t.wozniak@samsung.com>

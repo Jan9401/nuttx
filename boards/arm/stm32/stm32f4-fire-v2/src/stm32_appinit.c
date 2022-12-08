@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32_appinit.c
+ * boards/arm/stm32/stm32f4-fire-v2/src/stm32_appinit.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -26,7 +26,7 @@
 
 #include <nuttx/board.h>
 
-#include "stm32f4-fire-v2.h"
+#include "stm32f4_fire_v2.h"
 
 /****************************************************************************
  * Pre-processor Definitions

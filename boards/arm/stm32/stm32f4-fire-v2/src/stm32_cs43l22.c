@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32_cs43l22.c
+ * boards/arm/stm32/stm32f4-fire-v2/src/stm32_cs43l22.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -39,7 +39,7 @@
 #include <arch/board/board.h>
 
 #include "stm32.h"
-#include "stm32f4-fire-v2.h"
+#include "stm32f4_fire_v2.h"
 
 #ifdef HAVE_CS43L22
 
@@ -57,7 +57,7 @@ struct stm32_mwinfo_s
 
   struct cs43l22_lower_s lower;
 
-  /* Extensions for the stm32f4discovery board */
+  /* Extensions for the stm32f4-fire-v2 board */
 
   cs43l22_handler_t handler;
   void *arg;

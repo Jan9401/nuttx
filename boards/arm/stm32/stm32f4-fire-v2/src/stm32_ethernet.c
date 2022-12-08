@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32_ethernet.c
+ * boards/arm/stm32/stm32f4-fire-v2/src/stm32_ethernet.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -46,7 +46,7 @@
 #include "stm32_gpio.h"
 #include "stm32_eth.h"
 
-#include "stm32f4-fire-v2.h"
+#include "stm32f4_fire_v2.h"
 
 #if defined(CONFIG_STM32F4DISBB) && defined(CONFIG_STM32_ETHMAC)
 

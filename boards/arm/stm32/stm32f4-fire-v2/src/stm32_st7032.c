@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32_st7032.c
+ * boards/arm/stm32/stm32f4-fire-v2/src/stm32_st7032.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -31,7 +31,7 @@
 #include <nuttx/lcd/st7032.h>
 
 #include "stm32.h"
-#include "stm32f4-fire-v2.h"
+#include "stm32f4_fire_v2.h"
 
 #if defined(CONFIG_I2C) && defined(CONFIG_STM32_I2C1) && \
     defined(CONFIG_LCD_ST7032)

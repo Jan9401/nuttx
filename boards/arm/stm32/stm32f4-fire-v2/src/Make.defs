@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32/stm32f4discovery/src/Make.defs
+# boards/arm/stm32/stm32f4-fire-v2/src/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -185,6 +185,10 @@ endif
 
 ifeq ($(CONFIG_INPUT_DJOYSTICK),y)
   CSRCS += stm32_djoystick.c
+endif
+
+ifeq ($(CONFIG_MTD_W25),y)
+CSRCS += stm32_w25.c
 endif
 
 DEPPATH += --dep-path board

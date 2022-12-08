@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32_pwm.c
+ * boards/arm/stm32/stm32f4-fire-v2/src/stm32_pwm.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -33,7 +33,7 @@
 #include "chip.h"
 #include "arm_internal.h"
 #include "stm32_pwm.h"
-#include "stm32f4-fire-v2.h"
+#include "stm32f4_fire_v2.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -43,7 +43,7 @@
 
 /* PWM
  *
- * The stm32f4-fire-v2.has no real on-board PWM devices, but the board can
+ * The stm32f4_fire_v2.has no real on-board PWM devices, but the board can
  * be configured to output a pulse train using TIM4 CH2.  This pin is used by
  * FSMC is connected to CN5 just for this purpose:
  *

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32_ssd1351.c
+ * boards/arm/stm32/stm32f4-fire-v2/src/stm32_ssd1351.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -35,7 +35,7 @@
 #include "stm32_gpio.h"
 #include "stm32_spi.h"
 
-#include "stm32f4-fire-v2.h"
+#include "stm32f4_fire_v2.h"
 
 #ifdef CONFIG_LCD_SSD1351
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32_bringup.c
+ * boards/arm/stm32/stm32f4-fire-v2/src/stm32_bringup.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -58,11 +58,11 @@
 #include "stm32_apds9960.h"
 #endif
 
-#include "stm32f4-fire-v2.h"
+#include "stm32f4_fire_v2.h"
 
-/* Conditional logic in stm32f4-fire-v2.h will determine if certain features
+/* Conditional logic in stm32f4_fire_v2.h will determine if certain features
  * are supported.  Tests for these features need to be made after including
- * stm32f4-fire-v2.h.
+ * stm32f4_fire_v2.h.
  */
 
 #ifdef HAVE_RTC_DRIVER
@@ -294,6 +294,18 @@ int stm32_bringup(void)
       return ret;
     }
 #endif
+
+#ifdef CONFIG_MTD_W25 
+  /* Initialize and register the W25 FLASH file system. */
+
+  ret = stm32_w25initialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize W25 minor:0 %d\n", ret);
+      return ret;
+    }
+#endif
+
 
 #ifdef HAVE_SDIO
   /* Initialize the SDIO block driver */
@@ -534,7 +546,7 @@ int stm32_bringup(void)
 
 #ifdef CONFIG_LIS3DSH
   /* Create a lis3dsh driver instance fitting the chip built into
-   * stm32f4discovery
+   * stm32f4-fire-v2
    */
 
   ret = board_lis3dsh_initialize(0, 1);
