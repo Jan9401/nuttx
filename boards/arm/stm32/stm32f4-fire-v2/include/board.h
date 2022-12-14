@@ -322,16 +322,15 @@
 #define GPIO_TIM2_CH2OUT  GPIO_TIM2_CH2OUT_1
 #define GPIO_TIM3_CH3OUT  GPIO_TIM3_CH3OUT_1
 
-/* SPI - There is a MEMS device on SPI1 using these pins: */
+/* SPI - There is a spi flash device on SPI1 using these pins: */
 
 #define GPIO_SPI1_MISO    GPIO_SPI1_MISO_2
 #define GPIO_SPI1_MOSI    GPIO_SPI1_MOSI_2
 #define GPIO_SPI1_SCK     GPIO_SPI1_SCK_2
 
-/* SPI DMA -- As used for I2S DMA transfer with the audio configuration */
-
-#define DMACHAN_SPI1_RX   DMAMAP_SPI1_RX_1
-#define DMACHAN_SPI1_TX   DMAMAP_SPI1_TX_1
+/* SPI DMA -- As used for spi DMA transfer with the spi flash */
+#define DMACHAN_SPI1_RX   DMAMAP_SPI1_RX_2
+#define DMACHAN_SPI1_TX   DMAMAP_SPI1_TX_2
 
 /* SPI2 - Test MAX31855 on SPI2 PB10 = SCK, PB14 = MISO */
 

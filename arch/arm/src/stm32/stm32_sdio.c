@@ -696,6 +696,7 @@ static void stm32_configxfrints(struct stm32_dev_s *priv, uint32_t xfrmask)
 
   flags = enter_critical_section();
   priv->xfrmask = xfrmask;
+  finfo("SDIO_MASK: %x \n", priv->xfrmask | priv->waitmask | priv->sdiointmask);
 #ifdef CONFIG_STM32_SDIO_CARD
   putreg32(priv->xfrmask | priv->waitmask | priv->sdiointmask,
            STM32_SDIO_MASK);
@@ -902,6 +903,7 @@ static void stm32_dmacallback(DMA_HANDLE handle, uint8_t status, void *arg)
   stm32_sample((struct stm32_dev_s *)arg, SAMPLENDX_DMA_CALLBACK);
 
   /* Get the result of the DMA transfer */
+  finfo("status: %x\n", status);
 
   if ((status & DMA_STATUS_ERROR) != 0)
     {
@@ -2718,6 +2720,7 @@ static int stm32_dmapreflight(struct sdio_dev_s *dev,
     }
 #endif
 
+  finfo("buflen: %d\n", buflen);
   /* DMA must be possible to the buffer */
 
   if (!stm32_dmacapable((uintptr_t)buffer, (buflen + 3) >> 2,
@@ -2790,6 +2793,7 @@ static int stm32_dmarecvsetup(struct sdio_dev_s *dev,
     {
       dblocksize = stm32_log2(buflen) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
     }
+  finfo("buflen: %d, dblocksize: %d, priv->block_size:%d \n", buflen, dblocksize, priv->block_size);
 
   stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT_MS, buflen,
                    dblocksize | SDIO_DCTRL_DTDIR);

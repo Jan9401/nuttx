@@ -306,6 +306,12 @@ int stm32_bringup(void)
     }
 #endif
 
+#if defined(CONFIG_FAT_DMAMEMORY)
+  if (stm32_dma_alloc_init() < 0)
+    {
+      syslog(LOG_ERR, "DMA alloc FAILED");
+    }
+#endif
 
 #ifdef HAVE_SDIO
   /* Initialize the SDIO block driver */

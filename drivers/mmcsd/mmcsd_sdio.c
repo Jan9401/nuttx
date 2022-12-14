@@ -1184,6 +1184,7 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
 
   /* First, check if the card has been removed. */
 
+  finfo("mmcsd_transferready\n");
   if (!SDIO_PRESENT(priv->dev))
     {
       ferr("ERROR: Card has been removed\n");
@@ -1354,7 +1355,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
   off_t offset;
   int ret;
 
-  finfo("startblock=%jd\n", (intmax_t)startblock);
+  finfo("startblock=%jd, address %p\n", (intmax_t)startblock, buffer);
   DEBUGASSERT(priv != NULL && buffer != NULL);
 
   /* Check if the card is locked */
@@ -1370,6 +1371,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
    * will be able to before we commit the card to the operation.
    */
 
+  finfo("CONFIG_ARCH_HAVE_SDIO_PREFLIGHT\n");
   if ((priv->caps & SDIO_CAPS_DMASUPPORTED) != 0)
     {
       ret = SDIO_DMAPREFLIGHT(priv->dev, buffer, priv->blocksize);

@@ -105,16 +105,7 @@ int stm32_w25initialize(int minor)
       return -ENODEV;
     }
 
-#ifndef CONFIG_FS_NXFFS
-  /* And use the FTL layer to wrap the MTD driver as a block driver */
-
-  ret = ftl_initialize(minor, mtd);
-  if (ret < 0)
-    {
-      ferr("ERROR: Initialize the FTL layer\n");
-      return ret;
-    }
-#else
+#ifdef CONFIG_FS_NXFFS
   /* Initialize to provide NXFFS on the MTD interface */
 
   ret = nxffs_initialize(mtd);

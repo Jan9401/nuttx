@@ -216,6 +216,7 @@ static struct stm32_dma_s g_dma[DMA_NSTREAMS] =
 static inline uint32_t dmabase_getreg(struct stm32_dma_s *dmast,
                                       uint32_t offset)
 {
+  finfo("DMA_BASE(dmast->base) + offset:%x -> %x\n", DMA_BASE(dmast->base) + offset, getreg32(DMA_BASE(dmast->base) + offset));
   return getreg32(DMA_BASE(dmast->base) + offset);
 }
 
@@ -383,8 +384,10 @@ static int stm32_dmainterrupt(int irq, void *context, void *arg)
     }
 
   /* Get the stream structure from the stream and controller numbers */
+  finfo("irq: %d, stream: %d, controller:%d\n", irq, stream, controller);
 
   dmast = stm32_dmastream(stream, controller);
+  finfo("g_dma.base :%x %x %d\n", g_dma[11].base, dmast->base, dmast->irq);
 
   /* Select the interrupt status register (either the LISR or HISR)
    * based on the stream number that caused the interrupt.
@@ -404,6 +407,7 @@ static int stm32_dmainterrupt(int irq, void *context, void *arg)
   status = (dmabase_getreg(dmast, regoffset) >> dmast->shift) &
             DMA_STREAM_MASK;
 
+  finfo("fisrt status: %x %d\n", status, status);
   /* Clear fetched stream interrupts by setting bits in the upper or lower
    * IFCR register.
    */
@@ -754,6 +758,7 @@ void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg,
    * optionally interrupt at the halfway point.
    */
 
+  finfo("stm32_dmastart: %x \n", scr);//8a1 5421
   if ((scr & (DMA_SCR_DBM | DMA_SCR_CIRC)) == 0)
     {
       /* Once half of the bytes are transferred, the half-transfer flag
@@ -942,6 +947,7 @@ bool stm32_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr)
       return false;
     }
 
+  finfo("maddr & STM32_REGION_MASK: %x\n", maddr & STM32_REGION_MASK);
   switch (maddr & STM32_REGION_MASK)
     {
       case STM32_FSMC_BANK1:

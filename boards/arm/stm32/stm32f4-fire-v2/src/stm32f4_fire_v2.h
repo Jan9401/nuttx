@@ -921,5 +921,18 @@ int stm32_djoy_initialize(void);
 int stm32_w25initialize(int minor);
 #endif
 
+/****************************************************************************
+ * Name: stm32_dma_alloc_init
+ *
+ * Description:
+ *   All boards may optionally provide this API to instantiate a pool of
+ *   memory for uses with FAST FS DMA operations.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_FAT_DMAMEMORY)
+int stm32_dma_alloc_init(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_STM32_STM32F4DISCOVERY_SRC_STM32F4DISCOVERY_H */

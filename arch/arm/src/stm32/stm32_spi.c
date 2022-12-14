@@ -2098,9 +2098,9 @@ static void spi_bus_initialize(struct stm32_spidev_s *priv)
   priv->nbits     = 8;
   priv->mode      = SPIDEV_MODE0;
 
-  /* Select a default frequency of approx. 400KHz */
+  /* Select a default frequency of approx. 10000KHz */
 
-  spi_setfrequency((struct spi_dev_s *)priv, 400000);
+  spi_setfrequency((struct spi_dev_s *)priv, 10000000);
 
   /* CRCPOLY configuration */
 
@@ -2172,7 +2172,7 @@ struct spi_dev_s *stm32_spibus_initialize(int bus)
 
       if (!priv->initialized)
         {
-          /* Configure SPI1 pins: SCK, MISO, and MOSI */
+          /* Configure SPI1 pins: SCK, MISO, and MOSI spi flash */
 
           stm32_configgpio(GPIO_SPI1_SCK);
           stm32_configgpio(GPIO_SPI1_MISO);
