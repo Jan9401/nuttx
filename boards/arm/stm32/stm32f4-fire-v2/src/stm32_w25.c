@@ -85,6 +85,7 @@ int stm32_w25initialize(int minor)
 #ifdef CONFIG_FS_NXFFS
   char devname[12];
 #endif
+  const char *path = "/dev/mtd";
   int ret;
 
   /* Get the SPI port */
@@ -104,6 +105,26 @@ int stm32_w25initialize(int minor)
       ferr("ERROR: Failed to bind SPI port 2 to the SST 25 FLASH driver\n");
       return -ENODEV;
     }
+
+    /* Register the MTD driver so that it can be accessed from the  VFS */
+
+  ret = register_mtddriver(path, mtd, 0777, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_DEBUG, "ERROR: Failed to register MTD: %d\n", ret);
+      return -1;
+    }
+
+#ifdef CONFIG_FS_LITTLEFS
+  ret = nx_mount(path, "/data", "littlefs", 0, "autoformat");
+  if (ret < 0)
+    {
+      syslog(LOG_DEBUG,
+        "ERROR: Failed to mount littlefs at /data: %d\n", ret);
+      return -1;
+    }
+
+#endif /* CONFIG_FS_LITTLEFS */
 
 #ifdef CONFIG_FS_NXFFS
   /* Initialize to provide NXFFS on the MTD interface */
