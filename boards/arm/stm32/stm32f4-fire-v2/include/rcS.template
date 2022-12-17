@@ -1,0 +1,1 @@
+mount -t vfat /dev/mmcsd0 /mnt
