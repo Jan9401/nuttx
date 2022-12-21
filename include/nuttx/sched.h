@@ -102,7 +102,8 @@
 #define TCB_FLAG_EXIT_PROCESSING   (1 << 11)                     /* Bit 10: Exitting */
 #define TCB_FLAG_FREE_STACK        (1 << 12)                     /* Bit 12: Free stack after exit */
 #define TCB_FLAG_HEAP_CHECK        (1 << 13)                     /* Bit 13: Heap check */
-                                                                 /* Bits 14-15: Available */
+#define TCB_FLAG_HEAP_DUMP         (1 << 14)                     /* Bit 14: Heap dump */
+#define TCB_FLAG_DETACHED          (1 << 15)                     /* Bit 15: Pthread detached */
 
 /* Values for struct task_group tg_flags */
 
