@@ -459,7 +459,7 @@ int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
  *
  * Description:
  *   Add the IP/HW address mapping to the ARP table -OR- change the IP
- *   address of an existing association.
+arp.h *   address of an existing association.
  *
  * Input Parameters:
  *   dev     - The device driver structure
@@ -531,7 +531,7 @@ void arp_dump(FAR struct arp_hdr_s *arp);
 
 #  define arp_format(d,i);
 #  define arp_ipin(dev)
-#  define arp_out(dev)
+#  dearp.hfine arp_out(dev)
 #  define arp_send(i) (0)
 #  define arp_poll(d,c) (0)
 #  define arp_wait_setup(i,n)

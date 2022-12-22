@@ -108,6 +108,15 @@ int stm32_w25initialize(int minor)
 
     /* Register the MTD driver so that it can be accessed from the  VFS */
 
+#if 0
+  ret = ftl_initialize(0, mtd);
+  if (ret < 0)
+    {
+      ferr("ERROR: Initialize the FTL layer\n");
+      return ret;
+    }
+#endif
+
   ret = register_mtddriver(path, mtd, 0777, NULL);
   if (ret < 0)
     {

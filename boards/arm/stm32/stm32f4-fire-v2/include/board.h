@@ -72,7 +72,7 @@
  * LSE - 32.768 kHz
  */
 
-#define STM32_BOARD_XTAL        8000000ul
+#define STM32_BOARD_XTAL        25000000ul
 
 #define STM32_HSI_FREQUENCY     16000000ul
 #define STM32_LSI_FREQUENCY     32000
@@ -247,6 +247,10 @@
 #  define GPIO_USART1_TX        GPIO_USART1_TX_1
 #  define GPIO_USART1_RX        GPIO_USART1_RX_1
 
+/* UART RX DMA configurations */
+
+#define DMAMAP_USART1_RX DMAMAP_USART1_RX_1
+
 /* USART2:
  *
  * The STM32F4 Discovery has no on-board serial devices, but the console is
@@ -329,7 +333,7 @@
 #define GPIO_SPI1_SCK     GPIO_SPI1_SCK_2
 
 /* SPI DMA -- As used for spi DMA transfer with the spi flash */
-#define DMACHAN_SPI1_RX   DMAMAP_SPI1_RX_2
+#define DMACHAN_SPI1_RX   DMAMAP_SPI1_RX_1
 #define DMACHAN_SPI1_TX   DMAMAP_SPI1_TX_2
 
 /* SPI2 - Test MAX31855 on SPI2 PB10 = SCK, PB14 = MISO */
@@ -340,17 +344,17 @@
 
 /* SPI2 DMA -- As used for MMC/SD SPI */
 
-#define DMACHAN_SPI2_RX   DMAMAP_SPI2_RX
-#define DMACHAN_SPI2_TX   DMAMAP_SPI2_TX
+//#define DMACHAN_SPI2_RX   DMAMAP_SPI2_RX
+//#define DMACHAN_SPI2_TX   DMAMAP_SPI2_TX
 
 /* SPI3 DMA -- As used for I2S DMA transfer with the audio configuration */
 
-#define GPIO_SPI3_MISO    GPIO_SPI3_MISO_1
-#define GPIO_SPI3_MOSI    GPIO_SPI3_MOSI_1
-#define GPIO_SPI3_SCK     GPIO_SPI3_SCK_1
+//#define GPIO_SPI3_MISO    GPIO_SPI3_MISO_1
+//#define GPIO_SPI3_MOSI    GPIO_SPI3_MOSI_1
+//#define GPIO_SPI3_SCK     GPIO_SPI3_SCK_1
 
-#define DMACHAN_SPI3_RX   DMAMAP_SPI3_RX_1
-#define DMACHAN_SPI3_TX   DMAMAP_SPI3_TX_1
+//#define DMACHAN_SPI3_RX   DMAMAP_SPI3_RX_1
+//#define DMACHAN_SPI3_TX   DMAMAP_SPI3_TX_1
 
 /* I2S3 - CS43L22 configuration uses I2S3 */
 
@@ -358,9 +362,9 @@
 #define GPIO_I2S3_CK      GPIO_I2S3_CK_2
 #define GPIO_I2S3_WS      GPIO_I2S3_WS_1
 
-#define DMACHAN_I2S3_RX   DMAMAP_SPI3_RX_2
-#define DMACHAN_I2S3_TX   DMAMAP_SPI3_TX_2
-
+//#define DMACHAN_I2S3_RX   DMAMAP_SPI3_RX_2
+//#define DMACHAN_I2S3_TX   DMAMAP_SPI3_TX_2
+//
 /* I2C.  Only I2C1 is available on the stm32f4discovery.  I2C1_SCL and
  * I2C1_SDA are available on the following pins:
  *
@@ -421,7 +425,7 @@
  *   DMAMAP_SDIO_2 = Channel 4, Stream 6
  */
 
-#define DMAMAP_SDIO DMAMAP_SDIO_1
+#define DMAMAP_SDIO DMAMAP_SDIO_2
 
 /* ZERO CROSS pin definition */
 
