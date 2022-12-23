@@ -48,8 +48,7 @@
 
 #include "stm32f4_fire_v2.h"
 
-#if defined(CONFIG_STM32F4DISBB) && defined(CONFIG_STM32_ETHMAC)
-
+#if defined(CONFIG_STM32_ETHMAC)
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/

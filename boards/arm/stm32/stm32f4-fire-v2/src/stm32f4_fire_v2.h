@@ -365,26 +365,6 @@
 #define STM32_LCD_RS      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN8)
 
-/* STM32F4DIS-BB MicroSD
- *
- * ---------- ------------- ------------------------------
- * PIO        SIGNAL        Comments
- * ---------- ------------- ------------------------------
- * PB15       NCD           Pulled up externally
- * PC9        DAT1          Configured by driver
- * PC8        DAT0          "        " "" "    "
- * PC12       CLK           "        " "" "    "
- * PD2        CMD           "        " "" "    "
- * PC11       CD/DAT3       "        " "" "    "
- * PC10       DAT2          "        " "" "    "
- * ---------- ------------- ------------------------------
- */
-
-#if defined(CONFIG_STM32F4DISBB) && defined(CONFIG_STM32_SDIO)
-#  define GPIO_SDIO_NCD   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|\
-                           GPIO_PORTB|GPIO_PIN15)
-#endif
-
 /* STM32F4DIS-BB LAN8720
  *
  * ---------- ------------- ------------------------------
@@ -403,7 +383,7 @@
  * ---------- ------------- ------------------------------
  */
 
-#if defined(CONFIG_STM32F4DISBB) && defined(CONFIG_STM32_ETHMAC)
+#if defined(CONFIG_STM32_ETHMAC)
 #  define GPIO_EMAC_NINT  (GPIO_INPUT|GPIO_PULLUP|GPIO_EXTI|\
                            GPIO_PORTA|GPIO_PIN1)
 #  define GPIO_EMAC_NRST  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\

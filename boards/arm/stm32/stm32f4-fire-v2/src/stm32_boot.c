@@ -35,6 +35,7 @@
 
 #include "stm32.h"
 #include "stm32f4_fire_v2.h"
+#include "stm32_ccm.h"
 
 /****************************************************************************
  * Public Functions
@@ -94,6 +95,12 @@ void stm32_boardinitialize(void)
   /* Configure on-board LEDs if LED support has been selected. */
 
   board_autoled_initialize();
+#endif
+
+#ifdef HAVE_CCM_HEAP
+  /* Initialize CCM allocator */
+
+  ccm_initialize();
 #endif
 }
 
