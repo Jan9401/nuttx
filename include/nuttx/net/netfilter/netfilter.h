@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_assert.c
+ * include/nuttx/net/netfilter/netfilter.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,28 +18,42 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_NET_NETFILTER_NETFILTER_H
+#define __INCLUDE_NUTTX_NET_NETFILTER_NETFILTER_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <nuttx/board.h>
-
-#include <arch/board/board.h>
-
-#include "lm32.h"
+#include <sys/types.h>
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
+
+/* Responses from hook functions. */
+
+#define NF_DROP   0
+#define NF_ACCEPT 1
+#define NF_STOLEN 2
+#define NF_QUEUE  3
+#define NF_REPEAT 4
+#define NF_STOP   5 /* Deprecated, for userspace nf_queue compatibility. */
+#define NF_MAX_VERDICT NF_STOP
 
 /****************************************************************************
- * Name: up_assert
+ * Public Types
  ****************************************************************************/
 
-void up_assert(void)
+enum nf_inet_hooks
 {
-  board_autoled_on(LED_ASSERTION);
-  lm32_registerdump(g_current_regs);
-}
+  NF_INET_PRE_ROUTING,
+  NF_INET_LOCAL_IN,
+  NF_INET_FORWARD,
+  NF_INET_LOCAL_OUT,
+  NF_INET_POST_ROUTING,
+  NF_INET_NUMHOOKS,
+  NF_INET_INGRESS = NF_INET_NUMHOOKS,
+};
+
+#endif /* __INCLUDE_NUTTX_NET_NETFILTER_NETFILTER_H */

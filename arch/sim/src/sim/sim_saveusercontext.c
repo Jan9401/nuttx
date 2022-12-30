@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sparc/src/common/sparc_assert.c
+ * arch/sim/src/sim/sim_saveusercontext.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,17 +24,29 @@
 
 #include <nuttx/config.h>
 
-#include "sparc_internal.h"
+#include <nuttx/arch.h>
+
+#include "sim_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_assert
+ * Name: up_saveusercontext
+ *
+ * Description:
+ *   Save the current thread context.  Full prototype is:
+ *
+ *   int  up_saveusercontext(void *saveregs);
+ *
+ * Return:
+ *   0: Normal return
+ *   1: Context switch return
+ *
  ****************************************************************************/
 
-void up_assert(void)
+int up_saveusercontext(void *saveregs)
 {
-  sparc_registerdump(CURRENT_REGS);
+  return sim_saveusercontext(saveregs);
 }

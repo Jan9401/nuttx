@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/renesas/src/common/renesas_assert.c
+ * sched/misc/reboot_notifier.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,44 +22,66 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <nuttx/board.h>
-#include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <arch/board/board.h>
+#include <nuttx/notifier.h>
 
-#include "renesas_internal.h"
+#include <sys/types.h>
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static uint32_t s_last_regs[XCPTCONTEXT_REGS];
+static ATOMIC_NOTIFIER_HEAD(g_reboot_notifier_list);
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_assert
+ * Name:  register_reboot_notifier
+ *
+ * Description:
+ *   Add notifier to the reboot notifier chain
+ *
+ * Input Parameters:
+ *    nb - New entry in notifier chain
+ *
  ****************************************************************************/
 
-void up_assert(void)
+void register_reboot_notifier(FAR struct notifier_block *nb)
 {
-  volatile uint32_t *regs = g_current_regs;
+  atomic_notifier_chain_register(&g_reboot_notifier_list, nb);
+}
 
-  board_autoled_on(LED_ASSERTION);
+/****************************************************************************
+ * Name:  unregister_reboot_notifier
+ *
+ * Description:
+ *   Remove notifier from the reboot notifier chain
+ *
+ * Input Parameters:
+ *    nb - Entry to remove from notifier chain
+ *
+ ****************************************************************************/
 
-  /* Are user registers available from interrupt processing? */
+void unregister_reboot_notifier(FAR struct notifier_block *nb)
+{
+  atomic_notifier_chain_unregister(&g_reboot_notifier_list, nb);
+}
 
-  if (regs == NULL)
-    {
-      /* No.. capture user registers by hand */
+/****************************************************************************
+ * Name:  reboot_notifier_call_chain
+ *
+ * Description:
+ *   Call functions in the reboot notifier chain.
+ *
+ * Input Parameters:
+ *    action - Value passed unmodified to notifier function
+ *    data   - Pointer passed unmodified to notifier function
+ *
+ ****************************************************************************/
 
-      up_saveusercontext(s_last_regs);
-      regs = s_last_regs;
-    }
-
-  renesas_registerdump(regs);
+void reboot_notifier_call_chain(unsigned long action, FAR void *data)
+{
+  atomic_notifier_call_chain(&g_reboot_notifier_list, action, data);
 }

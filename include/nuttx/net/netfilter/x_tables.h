@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/or1k/src/common/or1k_assert.c
+ * include/nuttx/net/netfilter/x_tables.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,53 +18,71 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_NET_NETFILTER_X_TABLES_H
+#define __INCLUDE_NUTTX_NET_NETFILTER_X_TABLES_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stdint.h>
-#include <debug.h>
-
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
-
-#include <arch/board/board.h>
-
-#include "sched/sched.h"
-#include "or1k_internal.h"
+#include <sys/types.h>
 
 /****************************************************************************
- * Private Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
-static uint32_t s_last_regs[XCPTCONTEXT_REGS];
+#define XT_FUNCTION_MAXNAMELEN  30
+#define XT_EXTENSION_MAXNAMELEN 29
+#define XT_TABLE_MAXNAMELEN     32
+
+#define XT_STANDARD_TARGET   ""     /* Standard return verdict, or do jump. */
+#define XT_ERROR_TARGET      "ERROR"
+#define XT_MASQUERADE_TARGET "MASQUERADE"
 
 /****************************************************************************
- * Public Functions
+ * Public Types
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_assert
- ****************************************************************************/
-
-void up_assert(void)
+struct xt_entry_target
 {
-  volatile uint32_t *regs = CURRENT_REGS;
-
-  board_autoled_on(LED_ASSERTION);
-
-  /* Are user registers available from interrupt processing? */
-
-  if (regs == NULL)
+  union
     {
-      /* No.. capture user registers by hand */
+      struct
+        {
+          uint16_t target_size;
 
-      up_saveusercontext(s_last_regs);
-      regs = s_last_regs;
-    }
+          char name[XT_EXTENSION_MAXNAMELEN];
+          uint8_t revision;
+        } user;
+      struct
+        {
+          uint16_t target_size;
+        } kernel;
 
-  or1k_registerdump(regs);
-}
+      uint16_t target_size; /* Total length */
+    } u;
+
+  unsigned char data[0];
+};
+
+struct xt_standard_target
+{
+  struct xt_entry_target target;
+  int verdict;
+};
+
+struct xt_error_target
+{
+  struct xt_entry_target target;
+  char errorname[XT_FUNCTION_MAXNAMELEN];
+};
+
+struct xt_counters
+{
+  /* Packet and byte counters */
+
+  uint64_t pcnt;
+  uint64_t bcnt;
+};
+
+#endif /* __INCLUDE_NUTTX_NET_NETFILTER_X_TABLES_H */

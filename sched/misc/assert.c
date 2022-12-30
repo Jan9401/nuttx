@@ -27,14 +27,17 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/irq.h>
-#include <nuttx/panic_notifier.h>
-#include <nuttx/usb/usbdev_trace.h>
-#include <nuttx/syslog/syslog.h>
 #include <nuttx/tls.h>
+
+#include <nuttx/panic_notifier.h>
+#include <nuttx/reboot_notifier.h>
+#include <nuttx/syslog/syslog.h>
+#include <nuttx/usb/usbdev_trace.h>
 
 #include <assert.h>
 #include <debug.h>
-#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
 
 #include "irq/irq.h"
 #include "sched/sched.h"
@@ -58,6 +61,12 @@
 #ifndef CONFIG_USBDEV_TRACE
 #  undef CONFIG_ARCH_USBDUMP
 #endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static uint8_t g_last_regs[XCPTCONTEXT_SIZE];
 
 /****************************************************************************
  * Private Functions
@@ -90,10 +99,10 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
 #ifdef CONFIG_ARCH_STACKDUMP
 
 /****************************************************************************
- * Name: stackdump
+ * Name: stack_dump
  ****************************************************************************/
 
-static void stackdump(uintptr_t sp, uintptr_t stack_top)
+static void stack_dump(uintptr_t sp, uintptr_t stack_top)
 {
   uintptr_t stack;
 
@@ -125,7 +134,7 @@ static void dump_stack(FAR const char *tag, uintptr_t sp,
 
   if (sp >= base && sp < top)
     {
-      stackdump(sp, top);
+      stack_dump(sp, top);
     }
   else
     {
@@ -136,8 +145,8 @@ static void dump_stack(FAR const char *tag, uintptr_t sp,
 #ifdef CONFIG_STACK_COLORATION
           size_t remain = size - used;
 
-          base  += remain;
-          size  -= remain;
+          base += remain;
+          size -= remain;
 #endif
 
 #if CONFIG_ARCH_STACKDUMP_MAX_LENGTH > 0
@@ -147,7 +156,7 @@ static void dump_stack(FAR const char *tag, uintptr_t sp,
             }
 #endif
 
-          stackdump(base, base + size);
+          stack_dump(base, base + size);
         }
     }
 }
@@ -156,9 +165,8 @@ static void dump_stack(FAR const char *tag, uintptr_t sp,
  * Name: showstacks
  ****************************************************************************/
 
-static void showstacks(void)
+static void show_stacks(FAR struct tcb_s *rtcb)
 {
-  FAR struct tcb_s *rtcb = running_task();
   uintptr_t sp = up_getsp();
 
   /* Get the limits on the interrupt stack memory */
@@ -198,12 +206,7 @@ static void showstacks(void)
   dump_stack("Kernel", sp,
              (uintptr_t)rtcb->xcp.kstack,
              CONFIG_ARCH_KERNEL_STACKSIZE,
-#  ifdef CONFIG_STACK_COLORATION
-             up_check_tcbstack(rtcb),
-#  else
-             0,
-#  endif
-             false);
+             0, false);
 #endif
 }
 
@@ -362,8 +365,6 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
 #ifdef CONFIG_SCHED_BACKTRACE
 static void dump_backtrace(FAR struct tcb_s *tcb, FAR void *arg)
 {
-  /* Show back trace */
-
   sched_dumpstack(tcb->pid);
 }
 #endif
@@ -372,10 +373,9 @@ static void dump_backtrace(FAR struct tcb_s *tcb, FAR void *arg)
  * Name: showtasks
  ****************************************************************************/
 
-static void showtasks(void)
+static void show_tasks(void)
 {
-#if CONFIG_ARCH_INTERRUPTSTACK > 0
-#  ifdef CONFIG_STACK_COLORATION
+#if CONFIG_ARCH_INTERRUPTSTACK > 0 && defined(CONFIG_STACK_COLORATION)
   size_t stack_used = up_check_intstack();
   size_t stack_filled = 0;
 
@@ -386,7 +386,6 @@ static void showtasks(void)
       stack_filled = 10 * 100 *
                      stack_used / CONFIG_ARCH_INTERRUPTSTACK;
     }
-#  endif
 #endif
 
   /* Dump interesting properties of each task in the crash environment */
@@ -434,114 +433,111 @@ static void showtasks(void)
 }
 
 /****************************************************************************
- * Name: assert_end
- ****************************************************************************/
-
-static void assert_end(void)
-{
-  /* Flush any buffered SYSLOG data */
-
-  syslog_flush();
-
-  /* Are we in an interrupt handler or the idle task? */
-
-  if (up_interrupt_context() || running_task()->flink == NULL)
-    {
-#if CONFIG_BOARD_RESET_ON_ASSERT >= 1
-      board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
-#endif
-
-      /* Disable interrupts on this CPU */
-
-      up_irq_save();
-
-#ifdef CONFIG_SMP
-      /* Try (again) to stop activity on other CPUs */
-
-      spin_trylock(&g_cpu_irqlock);
-#endif
-
-      for (; ; )
-        {
-          up_mdelay(250);
-        }
-    }
-  else
-    {
-#if CONFIG_BOARD_RESET_ON_ASSERT >= 2
-      board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
-#endif
-    }
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 void _assert(FAR const char *filename, int linenum)
 {
+  FAR struct tcb_s *rtcb = running_task();
+  bool fatal = false;
+
   /* Flush any buffered SYSLOG data (from prior to the assertion) */
 
   syslog_flush();
 
 #if CONFIG_BOARD_RESET_ON_ASSERT < 2
-  if (!up_interrupt_context() && running_task()->flink != NULL)
+  if (up_interrupt_context() ||
+      (rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
     {
-      panic_notifier_call_chain(PANIC_TASK, NULL);
+      fatal = true;
     }
-  else
+#else
+  fatal = true;
 #endif
-    {
-      panic_notifier_call_chain(PANIC_KERNEL, NULL);
-    }
+
+  panic_notifier_call_chain(fatal ? PANIC_KERNEL : PANIC_TASK, NULL);
 
 #ifdef CONFIG_SMP
 #  if CONFIG_TASK_NAME_SIZE > 0
   _alert("Assertion failed CPU%d at file: %s:%d task: %s %p\n",
-         up_cpu_index(), filename, linenum, running_task()->name,
-         running_task()->entry.main);
+         up_cpu_index(), filename, linenum, rtcb->name, rtcb->entry.main);
 #  else
-  _alert("Assertion failed CPU%d at file: %s:%d\n",
-         up_cpu_index(), filename, linenum);
+  _alert("Assertion failed CPU%d at file: %s:%d task: %p\n",
+         up_cpu_index(), filename, linenum, rtcb->entry.main);
 #  endif
 #else
 #  if CONFIG_TASK_NAME_SIZE > 0
   _alert("Assertion failed at file: %s:%d task: %s %p\n",
-         filename, linenum, running_task()->name,
-         running_task()->entry.main);
+         filename, linenum, rtcb->name, rtcb->entry.main);
 #  else
-  _alert("Assertion failed at file: %s:%d\n",
-         filename, linenum);
+  _alert("Assertion failed at file: %s:%d task: %p\n",
+         filename, linenum, rtcb->entry.main);
 #  endif
 #endif
-
-#ifdef CONFIG_ARCH_USBDUMP
-  /* Dump USB trace data */
-
-  usbtrace_enumerate(assert_tracecallback, NULL);
-#endif
-
-#ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(up_getsp(), running_task(), filename, linenum);
-#endif
-
-  /* Flush any buffered SYSLOG data (from the above) */
-
-  syslog_flush();
 
   /* Show back trace */
 
 #ifdef CONFIG_SCHED_BACKTRACE
-  sched_dumpstack(running_task()->pid);
+  sched_dumpstack(rtcb->pid);
 #endif
 
-  up_assert();
+  /* Register dump */
+
+  if (up_interrupt_context())
+    {
+      up_dump_register(NULL);
+    }
+  else
+    {
+      up_saveusercontext(g_last_regs);
+      up_dump_register(g_last_regs);
+    }
 
 #ifdef CONFIG_ARCH_STACKDUMP
-  showstacks();
+  show_stacks(rtcb);
 #endif
 
-  showtasks();
+  /* Flush any buffered SYSLOG data */
 
-  assert_end();
+  syslog_flush();
+
+  if (fatal)
+    {
+      show_tasks();
+
+#ifdef CONFIG_ARCH_USBDUMP
+      /* Dump USB trace data */
+
+      usbtrace_enumerate(assert_tracecallback, NULL);
+#endif
+
+#ifdef CONFIG_BOARD_CRASHDUMP
+      board_crashdump(up_getsp(), rtcb, filename, linenum);
+#endif
+
+      /* Flush any buffered SYSLOG data */
+
+      syslog_flush();
+
+      reboot_notifier_call_chain(SYS_HALT, NULL);
+
+#if CONFIG_BOARD_RESET_ON_ASSERT >= 1
+      board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
+#else
+      /* Disable interrupts on this CPU */
+
+      up_irq_save();
+
+#  ifdef CONFIG_SMP
+      /* Try (again) to stop activity on other CPUs */
+
+      spin_trylock(&g_cpu_irqlock);
+#  endif
+
+      for (; ; )
+        {
+          up_mdelay(250);
+        }
+#endif
+    }
 }

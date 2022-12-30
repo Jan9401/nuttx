@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/sim_assert.c
+ * boards/arm64/a64/pinephone/src/pinephone_lcd.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,67 +18,81 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_ARM64_A64_PINEPHONE_SRC_PINEPHONE_LCD_H
+#define __BOARDS_ARM64_A64_PINEPHONE_SRC_PINEPHONE_LCD_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sched/sched.h>
-#include <debug.h>
-#include <stdlib.h>
-#include <nuttx/syslog/syslog.h>
-
-#ifdef CONFIG_BOARD_CRASHDUMP
-#  include <nuttx/board.h>
-#endif
-
-#include "sim_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Xingbangda XBD599 LCD Panel Width and Height (pixels) */
+
+#define PINEPHONE_LCD_PANEL_WIDTH  720
+#define PINEPHONE_LCD_PANEL_HEIGHT 1440
+
 /****************************************************************************
- * Private Types
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_assert
+ * Name: pinephone_lcd_backlight_enable
  *
  * Description:
- *   Called to terminate the simulation abnormally in the event of a failed
- *   assertion.
+ *   Turn on the Backlight in Xingbangda XBD599 LCD Panel.
+ *
+ * Input Parameters:
+ *   percent - Percent Brightness
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
  *
  ****************************************************************************/
 
-void up_assert(void)
-{
-  struct tcb_s *rtcb = running_task();
+int pinephone_lcd_backlight_enable(uint32_t percent);
 
-  if (CURRENT_REGS || is_idle_task(rtcb))
-    {
-      /* Exit the simulation */
+/****************************************************************************
+ * Name: pinephone_lcd_panel_reset
+ *
+ * Description:
+ *   Reset the Xingbangda XBD599 LCD Panel.
+ *
+ * Input Parameters:
+ *   val - True if Reset should be set to High; False if Reset should be
+ *         set to Low
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
 
-      host_abort(EXIT_FAILURE);
-    }
-}
+int pinephone_lcd_panel_reset(bool val);
+
+/****************************************************************************
+ * Name: pinephone_lcd_panel_init
+ *
+ * Description:
+ *   Initialize the Sitronix ST7703 LCD Controller in Xingbangda XBD599
+ *   LCD Panel.  Send 20 Initialization Commands to ST7703 over MIPI DSI.
+ *   Assumes that the LCD Panel has been powered on (via AXP803 PMIC),
+ *   MIPI DSI and D-PHY have been enabled on the SoC, and LCD Panel has
+ *   been Reset (to Low then High).  After the LCD Panel has been
+ *   initialized, we may start MIPI DSI (in HSC and HSD modes) and
+ *   Display Engine.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int pinephone_lcd_panel_init(void);
+
+#endif /* __BOARDS_ARM64_A64_PINEPHONE_SRC_PINEPHONE_LCD_H */

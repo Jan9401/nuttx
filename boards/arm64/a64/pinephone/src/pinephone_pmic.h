@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/x86_64/src/common/x86_64_assert.c
+ * boards/arm64/a64/pinephone/src/pinephone_pmic.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,37 +18,36 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_ARM64_A64_PINEPHONE_SRC_PINEPHONE_PMIC_H
+#define __BOARDS_ARM64_A64_PINEPHONE_SRC_PINEPHONE_PMIC_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <debug.h>
-
-#include <nuttx/irq.h>
-#include <nuttx/board.h>
-
-#include <arch/board/board.h>
-
-#include "sched/sched.h"
-#include "x86_64_internal.h"
-
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_assert
+ * Name: pinephone_pmic_init
+ *
+ * Description:
+ *   Initialize the X-Powers AXP803 Power Management Integrated Circuit,
+ *   connected on Reduced Serial Bus.  Power on the MIPI DSI Interface of
+ *   Xingbangda XBD599 LCD Panel.  Doesn't switch on the LCD Panel
+ *   Backlight, which is controlled by PIO and PWM.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
+ *
  ****************************************************************************/
 
-void up_assert(void)
-{
-  board_autoled_on(LED_ASSERTION);
+int pinephone_pmic_init(void);
 
-  if (g_current_regs != NULL)
-    {
-      x86_64_registerdump((uint64_t *)g_current_regs);
-    }
-}
+#endif /* __BOARDS_ARM64_A64_PINEPHONE_SRC_PINEPHONE_PMIC_H */

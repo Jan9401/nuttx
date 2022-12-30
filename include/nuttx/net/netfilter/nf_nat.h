@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/ceva/src/common/ceva_assert.c
+ * include/nuttx/net/netfilter/nf_nat.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,46 +18,70 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_NET_NETFILTER_NF_NAT_H
+#define __INCLUDE_NUTTX_NET_NETFILTER_NF_NAT_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <debug.h>
-
-#include <nuttx/arch.h>
-
-#include "sched/sched.h"
-#include "ceva_internal.h"
+#include <sys/types.h>
 
 /****************************************************************************
- * Private Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
-static uint32_t s_last_regs[XCPTCONTEXT_REGS];
+#define TABLE_NAME_NAT "nat"
 
 /****************************************************************************
- * Public Functions
+ * Public Types
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_assert
- ****************************************************************************/
-
-void up_assert(void)
+union nf_conntrack_man_proto
 {
-  volatile uint32_t *regs = CURRENT_REGS;
+  /* Add other protocols here. */
 
-  /* Are user registers available from interrupt processing? */
+  uint16_t all;
 
-  if (regs == NULL)
+  struct
     {
-      /* No.. capture user registers by hand */
+      uint16_t port;
+    } tcp;
+  struct
+    {
+      uint16_t port;
+    } udp;
+  struct
+    {
+      uint16_t id;
+    } icmp;
+  struct
+    {
+      uint16_t port;
+    } dccp;
+  struct
+    {
+      uint16_t port;
+    } sctp;
+  struct
+    {
+      uint16_t key; /* GRE key is 32bit, PPtP only uses 16bit */
+    } gre;
+};
 
-      up_saveusercontext(s_last_regs);
-      regs = s_last_regs;
-    }
+struct nf_nat_ipv4_range
+{
+  unsigned int                 flags;
+  uint32_t                     min_ip;
+  uint32_t                     max_ip;
+  union nf_conntrack_man_proto min;
+  union nf_conntrack_man_proto max;
+};
 
-  ceva_registerdump(regs);
-}
+struct nf_nat_ipv4_multi_range_compat
+{
+  unsigned int             rangesize;
+  struct nf_nat_ipv4_range range[1];
+};
+
+#endif /* __INCLUDE_NUTTX_NET_NETFILTER_NF_NAT_H */

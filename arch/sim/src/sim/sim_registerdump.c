@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/mips/src/mips32/mips_assert.c
+ * arch/sim/src/sim/sim_registerdump.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,22 +24,18 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/board.h>
+#include <nuttx/arch.h>
 
-#include <arch/board/board.h>
-
-#include "mips_internal.h"
+#include "sim_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_assert
+ * Name: up_dump_register
  ****************************************************************************/
 
-void up_assert(void)
+void up_dump_register(void *dumpregs)
 {
-  board_autoled_on(LED_ASSERTION);
-  mips_registerdump(CURRENT_REGS);
 }

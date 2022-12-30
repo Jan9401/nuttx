@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/misc/panic.c
+ * include/sys/signalfd.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,71 +18,71 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_SYS_SIGNALFD_H
+#define __INCLUDE_SYS_SIGNALFD_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/arch.h>
-#include <nuttx/notifier.h>
-
-#include <sys/types.h>
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static ATOMIC_NOTIFIER_HEAD(g_panic_notifier_list);
+#include <stdint.h>
+#include <signal.h>
+#include <fcntl.h>
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
+
+#define SFD_CLOEXEC O_CLOEXEC
+#define SFD_NONBLOCK O_NONBLOCK
 
 /****************************************************************************
- * Name:  panic_notifier_chain_register
- *
- * Description:
- *   Add notifier to the panic notifier chain
- *
- * Input Parameters:
- *    nb - New entry in notifier chain
- *
+ * Public Types
  ****************************************************************************/
 
-void panic_notifier_chain_register(FAR struct notifier_block *nb)
+struct signalfd_siginfo
 {
-  atomic_notifier_chain_register(&g_panic_notifier_list, nb);
-}
+  uint32_t ssi_signo;
+  int32_t  ssi_errno;
+  int32_t  ssi_code;
+  uint32_t ssi_pid;
+  uint32_t ssi_uid;
+  int32_t  ssi_fd;
+  uint32_t ssi_tid;
+  uint32_t ssi_band;
+  uint32_t ssi_overrun;
+  uint32_t ssi_trapno;
+  int32_t  ssi_status;
+  int32_t  ssi_int;
+  uint64_t ssi_ptr;
+  uint64_t ssi_utime;
+  uint64_t ssi_stime;
+  uint64_t ssi_addr;
+  uint16_t ssi_addr_lsb;
+  uint16_t __pad2;
+  int32_t  ssi_syscall;
+  uint64_t ssi_call_addr;
+  uint32_t ssi_arch;
+  uint8_t  __pad[28];
+};
 
 /****************************************************************************
- * Name:  panic_notifier_chain_unregister
- *
- * Description:
- *   Remove notifier from the panic notifier chain
- *
- * Input Parameters:
- *    nb - Entry to remove from notifier chain
- *
+ * Public Function Prototypes
  ****************************************************************************/
 
-void panic_notifier_chain_unregister(FAR struct notifier_block *nb)
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
 {
-  atomic_notifier_chain_unregister(&g_panic_notifier_list, nb);
+#else
+#define EXTERN extern
+#endif
+
+int signalfd(int fd, FAR const sigset_t *mask, int flags);
+
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
 
-/****************************************************************************
- * Name:  panic_notifier_call_chain
- *
- * Description:
- *   Call functions in the panic notifier chain.
- *
- * Input Parameters:
- *    action - Value passed unmodified to notifier function
- *    data   - Pointer passed unmodified to notifier function
- *
- ****************************************************************************/
-
-void panic_notifier_call_chain(unsigned long action, FAR void *data)
-{
-  atomic_notifier_call_chain(&g_panic_notifier_list, action, data);
-}
-
+#endif /* __INCLUDE_SYS_TIMERFD_H */

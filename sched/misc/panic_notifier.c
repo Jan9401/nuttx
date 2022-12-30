@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/x86/src/common/x86_assert.c
+ * sched/misc/panic_notifier.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,47 +22,67 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stdint.h>
-#include <debug.h>
-
-#include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/board.h>
+#include <nuttx/notifier.h>
 
-#include <arch/board/board.h>
-
-#include "sched/sched.h"
-#include "x86_internal.h"
+#include <sys/types.h>
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static uint32_t s_last_regs[XCPTCONTEXT_REGS];
+static ATOMIC_NOTIFIER_HEAD(g_panic_notifier_list);
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_assert
+ * Name:  panic_notifier_chain_register
+ *
+ * Description:
+ *   Add notifier to the panic notifier chain
+ *
+ * Input Parameters:
+ *    nb - New entry in notifier chain
+ *
  ****************************************************************************/
 
-void up_assert(void)
+void panic_notifier_chain_register(FAR struct notifier_block *nb)
 {
-  board_autoled_on(LED_ASSERTION);
-
-  if (g_current_regs != NULL)
-    {
-      x86_registerdump((uint32_t *)g_current_regs);
-    }
-  else
-    {
-      /* Capture and dump user registers by hand */
-
-      up_saveusercontext(s_last_regs);
-      x86_registerdump(s_last_regs);
-    }
+  atomic_notifier_chain_register(&g_panic_notifier_list, nb);
 }
+
+/****************************************************************************
+ * Name:  panic_notifier_chain_unregister
+ *
+ * Description:
+ *   Remove notifier from the panic notifier chain
+ *
+ * Input Parameters:
+ *    nb - Entry to remove from notifier chain
+ *
+ ****************************************************************************/
+
+void panic_notifier_chain_unregister(FAR struct notifier_block *nb)
+{
+  atomic_notifier_chain_unregister(&g_panic_notifier_list, nb);
+}
+
+/****************************************************************************
+ * Name:  panic_notifier_call_chain
+ *
+ * Description:
+ *   Call functions in the panic notifier chain.
+ *
+ * Input Parameters:
+ *    action - Value passed unmodified to notifier function
+ *    data   - Pointer passed unmodified to notifier function
+ *
+ ****************************************************************************/
+
+void panic_notifier_call_chain(unsigned long action, FAR void *data)
+{
+  atomic_notifier_call_chain(&g_panic_notifier_list, action, data);
+}
+

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/riscv_assert.c
+ * include/nuttx/reboot_notifier.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,59 +18,70 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_REBOOT_NOTIFIER_H
+#define __INCLUDE_NUTTX_REBOOT_NOTIFIER_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/notifier.h>
 
-#include <stdio.h>
-#include <stdint.h>
-#include <debug.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
-
-#include <arch/board/board.h>
-
-#include "sched/sched.h"
-#include "riscv_internal.h"
+#include <sys/types.h>
 
 /****************************************************************************
- * Private Functions
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define SYS_DOWN        0x0001     /* Notify of system down */
+#define SYS_RESTART     SYS_DOWN
+#define SYS_HALT        0x0002     /* Notify of system halt */
+#define SYS_POWER_OFF   0x0003     /* Notify of system power off */
+
+/****************************************************************************
+ * Public Function
  ****************************************************************************/
 
 /****************************************************************************
- * Private Data
+ * Name:  register_reboot_notifier
+ *
+ * Description:
+ *   Add notifier to the reboot notifier chain
+ *
+ * Input Parameters:
+ *    nb - New entry in notifier chain
+ *
  ****************************************************************************/
 
-static uint8_t s_last_regs[XCPTCONTEXT_SIZE];
+void register_reboot_notifier(FAR struct notifier_block *nb);
 
 /****************************************************************************
- * Public Functions
+ * Name:  unregister_reboot_notifier
+ *
+ * Description:
+ *   Remove notifier from the reboot notifier chain
+ *
+ * Input Parameters:
+ *    nb - Entry to remove from notifier chain
+ *
  ****************************************************************************/
+
+void unregister_reboot_notifier(FAR struct notifier_block *nb);
 
 /****************************************************************************
- * Name: up_assert
+ * Name:  reboot_notifier_call_chain
+ *
+ * Description:
+ *   Call functions in the reboot notifier chain.
+ *
+ * Input Parameters:
+ *    action - Value passed unmodified to notifier function
+ *    data   - Pointer passed unmodified to notifier function
+ *
  ****************************************************************************/
 
-void up_assert(void)
-{
-  struct tcb_s *rtcb = running_task();
+void reboot_notifier_call_chain(unsigned long action, FAR void *data);
 
-  board_autoled_on(LED_ASSERTION);
+#endif /* __INCLUDE_NUTTX_REBOOT_NOTIFIER_H */
 
-  /* Update the xcp context */
-
-  if (CURRENT_REGS)
-    {
-      rtcb->xcp.regs = (uintptr_t *)CURRENT_REGS;
-    }
-  else
-    {
-      up_saveusercontext(s_last_regs);
-      rtcb->xcp.regs = (uintptr_t *)s_last_regs;
-    }
-
-  riscv_registerdump(rtcb->xcp.regs);
-}

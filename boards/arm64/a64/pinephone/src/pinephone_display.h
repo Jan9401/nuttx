@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/misoc/src/minerva/minerva_assert.c
+ * boards/arm64/a64/pinephone/src/pinephone_display.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,28 +18,35 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_ARM64_A64_PINEPHONE_SRC_PINEPHONE_DISPLAY_H
+#define __BOARDS_ARM64_A64_PINEPHONE_SRC_PINEPHONE_DISPLAY_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <nuttx/board.h>
-
-#include <arch/board/board.h>
-
-#include "minerva.h"
-
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_assert
+ * Name: pinephone_display_test_pattern
+ *
+ * Description:
+ *   Fill the 3 Frame Buffers with a Test Pattern.  Should be called after
+ *   Display Engine is Enabled, or the rendered image will have missing
+ *   rows.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
 
-void up_assert(void)
-{
-  board_autoled_on(LED_ASSERTION);
-  mineva_registerdump(g_current_regs);
-}
+void pinephone_display_test_pattern(void);
+
+#endif /* __BOARDS_ARM64_A64_PINEPHONE_SRC_PINEPHONE_DISPLAY_H */

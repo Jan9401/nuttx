@@ -78,8 +78,10 @@ struct note_driver_ops_s
                         FAR volatile void *spinlock, int type);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
-  CODE void (*syscall_enter)(FAR struct note_driver_s *drv, int nr);
-  CODE void (*syscall_leave)(FAR struct note_driver_s *drv, int nr);
+  CODE void (*syscall_enter)(FAR struct note_driver_s *drv,
+                             int nr, int argc, va_list *ap);
+  CODE void (*syscall_leave)(FAR struct note_driver_s *drv,
+                             int nr, uintptr_t result);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
   CODE void (*irqhandler)(FAR struct note_driver_s *drv, int irq,
@@ -129,5 +131,27 @@ int note_initialize(void);
 #endif
 
 #endif /* defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT) */
+
+#if CONFIG_DRIVER_NOTE_TASKNAME_BUFSIZE > 0
+
+/****************************************************************************
+ * Name: note_get_taskname
+ *
+ * Description:
+ *   Get the task name string of the specified PID
+ *
+ * Input Parameters:
+ *   PID - Task ID
+ *   name - Task name buffer
+ *          this buffer must be greater than CONFIG_TASK_NAME_SIZE + 1
+ *
+ * Returned Value:
+ *   Retrun OK if task name can be retrieved, otherwise -ESRCH
+ *
+ ****************************************************************************/
+
+int note_get_taskname(pid_t pid, FAR char *name);
+
+#endif /* CONFIG_DRIVER_NOTE_TASKNAME_BUFSIZE > 0 */
 
 #endif /* __INCLUDE_NUTTX_NOTE_NOTE_DRIVER_H */
