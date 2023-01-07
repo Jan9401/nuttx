@@ -110,7 +110,7 @@ void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
 #ifdef CONFIG_NET_TCP_WRBUFFER_DUMP
   /* Dump the outgoing device buffer */
 
-  lib_dumpbuffer("devif_iob_send", dev->d_appdata, len);
+  lib_dumpbuffer("devif_iob_send", dev->d_appdata, len);//bug dev->d_appdata 之前的数据
 #endif
 }
 

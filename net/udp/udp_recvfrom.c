@@ -402,7 +402,7 @@ static uint16_t udp_eventhandler(FAR struct net_driver_s *dev,
 {
   FAR struct udp_recvfrom_s *pstate = pvpriv;
 
-  ninfo("flags: %04x\n", flags);
+  syslog(0, "flags: %04x\n", flags);
 
   /* 'priv' might be null in some race conditions (?) */
 
@@ -640,7 +640,7 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
 
           ret = net_timedwait(&state.ir_sem,
                               _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
-          if (ret == -ETIMEDOUT)
+          if (ret == -ETIMEDOUT)//DHCPD_Failed
             {
               ret = -EAGAIN;
             }

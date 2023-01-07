@@ -109,7 +109,7 @@ static int     rpmsgfs_fstat(FAR const struct file *filep,
                              FAR struct stat *buf);
 static int     rpmsgfs_fchstat(FAR const struct file *filep,
                                FAR const struct stat *buf, int flags);
-static int     rpmsgfs_ftruncate(FAR struct file *filep,
+static int     rpmsgfs_truncate(FAR struct file *filep,
                                  off_t length);
 
 static int     rpmsgfs_opendir(FAR struct inode *mountpt,
@@ -161,12 +161,13 @@ const struct mountpt_operations rpmsgfs_operations =
   rpmsgfs_write,         /* write */
   rpmsgfs_seek,          /* seek */
   rpmsgfs_ioctl,         /* ioctl */
+  NULL,                  /* mmap */
+  rpmsgfs_truncate,      /* truncate */
 
   rpmsgfs_sync,          /* sync */
   rpmsgfs_dup,           /* dup */
   rpmsgfs_fstat,         /* fstat */
   rpmsgfs_fchstat,       /* fchstat */
-  rpmsgfs_ftruncate,     /* ftruncate */
 
   rpmsgfs_opendir,       /* opendir */
   rpmsgfs_closedir,      /* closedir */
@@ -803,7 +804,7 @@ static int rpmsgfs_fchstat(FAR const struct file *filep,
 }
 
 /****************************************************************************
- * Name: rpmsgfs_ftruncate
+ * Name: rpmsgfs_truncate
  *
  * Description:
  *   Set the length of the open, regular file associated with the file
@@ -811,7 +812,7 @@ static int rpmsgfs_fchstat(FAR const struct file *filep,
  *
  ****************************************************************************/
 
-static int rpmsgfs_ftruncate(FAR struct file *filep, off_t length)
+static int rpmsgfs_truncate(FAR struct file *filep, off_t length)
 {
   FAR struct inode *inode;
   FAR struct rpmsgfs_mountpt_s *fs;

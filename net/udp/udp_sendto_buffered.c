@@ -431,7 +431,7 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
        */
 
       sndlen = wrb->wb_iob->io_pktlen - udpiplen;
-      ninfo("wrb=%p sndlen=%zu\n", wrb, sndlen);
+      syslog(0, "wrb=%p sndlen=%zu\n", wrb, sndlen);//295 - 267 = 28
 
 #ifdef NEED_IPDOMAIN_SUPPORT
       /* If both IPv4 and IPv6 support are enabled, then we will need to
@@ -777,7 +777,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       /* Not connected.  Use the provided destination address */
 
       else
-        {
+       {
           memcpy(&wrb->wb_dest, to, tolen);
         }
 
@@ -795,7 +795,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       if (nonblock)
         {
           ret = iob_trycopyin(wrb->wb_iob, (FAR uint8_t *)buf,
-                              len, udpiplen, false);
+                              len, udpiplen, true);
         }
       else
         {
@@ -809,7 +809,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
           blresult = net_breaklock(&count);
           ret = iob_copyin(wrb->wb_iob, (FAR uint8_t *)buf,
-                           len, udpiplen, false);
+                           len, udpiplen, true);
           if (blresult >= 0)
             {
               net_restorelock(count);
@@ -916,7 +916,7 @@ int psock_udp_cansend(FAR struct udp_conn_s *conn)
    * many more.
    */
 
-  if (udp_wrbuffer_test() < 0 || iob_navail(false) <= 0)
+  if (udp_wrbuffer_test() < 0 || iob_navail(true) <= 0)
     {
       return -EWOULDBLOCK;
     }
