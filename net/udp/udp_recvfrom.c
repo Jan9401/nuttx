@@ -402,7 +402,6 @@ static uint16_t udp_eventhandler(FAR struct net_driver_s *dev,
 {
   FAR struct udp_recvfrom_s *pstate = pvpriv;
 
-  syslog(0, "flags: %04x\n", flags);
 
   /* 'priv' might be null in some race conditions (?) */
 

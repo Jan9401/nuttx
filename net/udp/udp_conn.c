@@ -174,7 +174,6 @@ static inline FAR struct udp_conn_s *
   FAR struct udp_conn_s *conn;
 
   conn = (FAR struct udp_conn_s *)g_active_udp_connections.head;
-  syslog(0,"ipv4_active: %p\n", conn);
   while (conn)
     {
       /* If the local UDP port is non-zero, the connection is considered
@@ -229,7 +228,6 @@ static inline FAR struct udp_conn_s *
        * the port number in the destination address.
        */
 
-      syslog(0,"conn->lport: %d, %d %d %x %x",conn->lport,  udp->destport , conn->lport, conn->u.ipv4.laddr, ip->destipaddr);
       if (conn->lport != 0 && udp->destport == conn->lport &&
 
           /* Local port accepts any address on this port or there

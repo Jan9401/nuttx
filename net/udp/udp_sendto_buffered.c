@@ -431,7 +431,6 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
        */
 
       sndlen = wrb->wb_iob->io_pktlen - udpiplen;
-      syslog(0, "wrb=%p sndlen=%zu\n", wrb, sndlen);//295 - 267 = 28
 
 #ifdef NEED_IPDOMAIN_SUPPORT
       /* If both IPv4 and IPv6 support are enabled, then we will need to

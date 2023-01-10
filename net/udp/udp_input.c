@@ -111,7 +111,6 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
   /* Get the size of the IP header and the UDP header */
 
   udpiplen = iplen + UDP_HDRLEN;//28
-  syslog(0,"udpiplen:%d dev->d_len: %d, dev: %p, check: %x\n", udpiplen, dev->d_len, dev, udp->udpchksum);
 
   /* UDP processing is really just a hack. We don't do anything to the UDP/IP
    * headers, but let the UDP application do all the hard work. If the
@@ -150,7 +149,6 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
       g_netstats.udp.drop++;
       g_netstats.udp.chkerr++;
 #endif
-      syslog(0, "WARNING: Bad UDP checksum\n");
       dev->d_len = 0;
     }
   else
@@ -173,7 +171,6 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
        */
 
       conn = udp_active(dev, udp);
-      syslog(0,"udp conn: %p\n", conn);
       if (conn)
         {
           uint16_t flags;
