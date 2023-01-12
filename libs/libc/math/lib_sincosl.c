@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/usrsock/usrsock_rpmsg.h
+ * libs/libc/math/lib_sincosl.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,44 +18,25 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_USRSOCK_USRSOCK_RPMSG_H
-#define __DRIVERS_USRSOCK_USRSOCK_RPMSG_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/net/usrsock.h>
+#include <nuttx/config.h>
+#include <nuttx/compiler.h>
+
+#include <math.h>
 
 /****************************************************************************
- * Pre-processor definitions
+ * Public Functions
  ****************************************************************************/
 
-#define USRSOCK_RPMSG_EPT_NAME      "rpmsg-usrsock"
+#ifdef CONFIG_HAVE_LONG_DOUBLE
 
-#define USRSOCK_RPMSG_DNS_REQUEST    USRSOCK_REQUEST__MAX
-#define USRSOCK_RPMSG_DNS_EVENT      127
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* DNS request message */
-
-begin_packed_struct struct usrsock_rpmsg_dns_request_s
+void sincosl(long double x, long double *s, long double *c)
 {
-  struct usrsock_request_common_s head;
+  *s = sinl(x);
+  *c = cosl(x);
+}
 
-  uint16_t addrlen;
-} end_packed_struct;
-
-/* DNS event message */
-
-begin_packed_struct struct usrsock_rpmsg_dns_event_s
-{
-  struct usrsock_message_common_s head;
-
-  uint16_t addrlen;
-} end_packed_struct;
-
-#endif /* __DRIVERS_USRSOCK_USRSOCK_RPMSG_H */
+#endif
