@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/shm/shm_initialize.c
+ * mm/map/vm_region.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,95 +22,73 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <assert.h>
-#include <debug.h>
-#include <errno.h>
-
-#include <nuttx/addrenv.h>
-#include <nuttx/sched.h>
+#include <nuttx/mm/map.h>
 #include <nuttx/mm/gran.h>
-#include <nuttx/pgalloc.h>
-#include <nuttx/mm/shm.h>
-
-#include "shm/shm.h"
-
-#ifdef CONFIG_MM_SHM
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* State of the all shared memory */
-
-struct shm_info_s g_shminfo =
-{
-  NXMUTEX_INITIALIZER
-};
+#include <debug.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: shm_group_initialize
+ * Name: vm_alloc_region
  *
  * Description:
- *   Initialize the group shared memory data structures when a new task
- *   group is initialized.
+ *   Allocate virtual memory region from the process virtual memory area.
  *
  * Input Parameters:
- *   group - A reference to the new group structure to be initialized.
+ *   mm    - A reference to the process mm_map struct
+ *   vaddr - Virtual start address where the allocation starts, if NULL, will
+ *           seek and return an address that satisfies the 'size' parameter
+ *   size - Size of the area to allocate
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *   Pointer to reserved vaddr, or NULL if out-of-memory
  *
  ****************************************************************************/
 
-int shm_group_initialize(FAR struct task_group_s *group)
+FAR void *vm_alloc_region(FAR struct mm_map_s *mm, FAR void *vaddr,
+                          size_t size)
 {
-  DEBUGASSERT(group && !group->tg_shm.gs_handle);
+  FAR void *ret = NULL;
 
-  group->tg_shm.gs_handle =
-    gran_initialize((FAR void *)CONFIG_ARCH_SHM_VBASE,
-                    ARCH_SHM_MAXPAGES << MM_PGSHIFT,
-                    MM_PGSHIFT, MM_PGSHIFT);
+  DEBUGASSERT(mm != NULL);
 
-  if (!group->tg_shm.gs_handle)
+  if (mm->mm_map_vpages != NULL)
     {
-      shmerr("ERROR: gran_initialize() failed\n");
-      return -ENOMEM;
+      if (vaddr == NULL)
+        {
+          ret = gran_alloc(mm->mm_map_vpages, size);
+        }
+      else
+        {
+          ret = gran_reserve(mm->mm_map_vpages, (uintptr_t)vaddr,
+                             size);
+        }
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
- * Name: shm_group_release
+ * Name: vm_release_region
  *
  * Description:
- *   Release resources used by the group shared memory logic.  This function
- *   is called at the time at the group is destroyed.
+ *   Free a previously allocated virtual memory region
  *
  * Input Parameters:
- *   group - A reference to the group structure to be un-initialized.
- *
- * Returned Value:
- *   None
+ *   mm    - A reference to the process' mm_map struct
+ *   vaddr - Virtual start address where the allocation starts.
+ *   size  - Size of the allocated area.
  *
  ****************************************************************************/
 
-void shm_group_release(FAR struct task_group_s *group)
+void vm_release_region(FAR struct mm_map_s *mm, FAR void *vaddr, size_t size)
 {
-  GRAN_HANDLE handle;
-  DEBUGASSERT(group);
+  DEBUGASSERT(mm != NULL);
 
-  handle = group->tg_shm.gs_handle;
-  if (handle)
+  if (mm->mm_map_vpages != NULL)
     {
-      gran_release(handle);
+      gran_free(mm->mm_map_vpages, vaddr, size);
     }
 }
-
-#endif /* CONFIG_MM_SHM */
