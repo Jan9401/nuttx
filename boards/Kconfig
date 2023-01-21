@@ -370,7 +370,7 @@ config ARCH_BOARD_ESP32S2_SAOLA_1
 	select ARCH_HAVE_IRQBUTTONS if ESP32S2_GPIO_IRQ
 	---help---
 		This is the ESP32-S2-Saola-1 board
-		
+
 config ARCH_BOARD_FRANZININHO_WIFI
 	bool "FRANZININHO WI-FI"
 	depends on ARCH_CHIP_ESP32S2WROVER
@@ -379,7 +379,7 @@ config ARCH_BOARD_FRANZININHO_WIFI
 	select ARCH_HAVE_IRQBUTTONS if ESP32S2_GPIO_IRQ
 	---help---
 		Franzininho Wi-Fi is a development board to evaluate the ESP32-S2 SoC
-		
+
 config ARCH_BOARD_ESP32S3_DEVKIT
 	bool "Espressif ESP32-S3 DevKit"
 	depends on ARCH_CHIP_ESP32S3WROOM1 || ARCH_CHIP_ESP32S3MINI1
@@ -1619,6 +1619,13 @@ config ARCH_BOARD_ADAFRUIT_QT_PY_RP2040
 	depends on ARCH_CHIP_RP2040
 	---help---
 		This is a port to the Adafruit QT Py RP2040 board.
+		Support is derived from Raspberry Pi Pico support.
+
+config ARCH_BOARD_WAVESHARE_RP2040_LCD_1_28
+	bool "Waveshare RP2040 LCD 1.28 board"
+	depends on ARCH_CHIP_RP2040
+	---help---
+		This is a port to the Waveshare RP2040 LCD 1.28 board.
 		Support is derived from Raspberry Pi Pico support.
 
 config ARCH_BOARD_RX65N
