@@ -248,7 +248,10 @@ endif
 
 ifneq ($(CONFIG_CXX_RTTI),y)
   ARCHCXXFLAGS += -fno-rtti
+else
+  ARCHCXXFLAGS += -frtti
 endif
+
 
 ARCHOPTIMIZATION += -fno-common -Wall -Wshadow -Wundef
 
