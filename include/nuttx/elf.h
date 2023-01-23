@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include <elf.h>
+#include <stdbool.h>
 #ifdef CONFIG_ELF_COREDUMP
 #include <arch/elf.h>
 #endif
