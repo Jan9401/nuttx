@@ -344,8 +344,9 @@ struct tcp_conn_s
   FAR struct devif_callback_s *connevents;
   FAR struct devif_callback_s *connevents_tail;
 
-  /* Reference to TCP close callback instance */
+  /* Reference to TCP shutdown/close callback instance */
 
+  FAR struct devif_callback_s *shdcb;
   FAR struct devif_callback_s *clscb;
   struct work_s                clswork;
 
@@ -448,6 +449,16 @@ void tcp_initialize(void);
  ****************************************************************************/
 
 FAR struct tcp_conn_s *tcp_alloc(uint8_t domain);
+
+/****************************************************************************
+ * Name: tcp_free_rx_buffers
+ *
+ * Description:
+ *   Free rx buffer of a connection
+ *
+ ****************************************************************************/
+
+void tcp_free_rx_buffers(FAR struct tcp_conn_s *conn);
 
 /****************************************************************************
  * Name: tcp_free
@@ -758,6 +769,23 @@ void tcp_lost_connection(FAR struct tcp_conn_s *conn,
 int tcp_close(FAR struct socket *psock);
 
 /****************************************************************************
+ * Name: tcp_shutdown
+ *
+ * Description:
+ *   Gracefully shutdown a TCP connection by sending a SYN
+ *
+ * Input Parameters:
+ *   psock - An instance of the internal socket structure.
+ *   how   - Specifies the type of shutdown.
+ *
+ * Assumptions:
+ *   Called from normal user-level logic
+ *
+ ****************************************************************************/
+
+int tcp_shutdown(FAR struct socket *psock, int how);
+
+/****************************************************************************
  * Name: tcp_ipv4_select
  *
  * Description:
@@ -780,6 +808,16 @@ void tcp_ipv4_select(FAR struct net_driver_s *dev);
 #ifdef CONFIG_NET_IPv6
 void tcp_ipv6_select(FAR struct net_driver_s *dev);
 #endif
+
+/****************************************************************************
+ * Name: tcp_ip_select
+ *
+ * Description:
+ *   Configure to send or receive an TCP IPv[4|6] packet for connection
+ *
+ ****************************************************************************/
+
+void tcp_ip_select(FAR struct tcp_conn_s *conn);
 
 /****************************************************************************
  * Name: tcp_setsequence
@@ -1108,6 +1146,7 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
  *
  * Input Parameters:
  *   dev    - The device driver structure to use in the send operation
+ *   conn   - The TCP connection structure holding connection information
  *
  * Returned Value:
  *   None
@@ -1117,7 +1156,7 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
  *
  ****************************************************************************/
 
-void tcp_reset(FAR struct net_driver_s *dev);
+void tcp_reset(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn);
 
 /****************************************************************************
  * Name: tcp_rx_mss

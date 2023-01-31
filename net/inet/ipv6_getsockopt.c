@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/net/lib_shutdown.c
+ * net/inet/ipv6_getsockopt.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,51 +24,76 @@
 
 #include <nuttx/config.h>
 
-#include <sys/socket.h>
+#include <sys/types.h>
+#include <errno.h>
+#include <debug.h>
 
-#ifdef CONFIG_NET
+#include <netinet/in.h>
+
+#include <nuttx/net/net.h>
+
+#include "mld/mld.h"
+#include "inet/inet.h"
+#include "udp/udp.h"
+
+#ifdef CONFIG_NET_IPv6
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: shutdown
+ * Name: ipv6_getsockopt
  *
  * Description:
- *   The shutdown() function will cause all or part of a full-duplex
- *   connection on the socket associated with the file descriptor socket to
- *   be shut down.
+ *   ipv6_getsockopt() sets the IPv6-protocol socket option specified by the
+ *   'option' argument to the value pointed to by the 'value' argument for
+ *   the socket specified by the 'psock' argument.
  *
- *   The shutdown() function disables subsequent send and/or receive
- *   operations on a socket, depending on the value of the how argument.
+ *   See <netinet/in.h> for the a complete list of values of IPv6 protocol
+ *   socket options.
  *
  * Input Parameters:
- *   sockfd - Specifies the file descriptor of the socket.
- *   how    - Specifies the type of shutdown. The values are as follows:
- *
- *     SHUT_RD   - Disables further receive operations.
- *     SHUT_WR   - Disables further send operations.
- *     SHUT_RDWR - Disables further send and receive operations.
+ *   psock     Socket structure of socket to operate on
+ *   option    identifies the option to set
+ *   value     Points to the argument value
+ *   value_len The length of the argument value
  *
  * Returned Value:
- *   Upon successful completion, shutdown() will return 0; otherwise, -1 will
- *   be returned and errno set to indicate the error.
- *
- *     EBADF     - The socket argument is not a valid file descriptor.
- *     EINVAL    - The how argument is invalid.
- *     ENOTCONN  - The socket is not connected.
- *     ENOTSOCK  - The socket argument does not refer to a socket.
- *     ENOBUFS   - Insufficient resources were available in the system to
- *     perform the operation.
+ *   Returns zero (OK) on success.  On failure, it returns a negated errno
+ *   value to indicate the nature of the error.
  *
  ****************************************************************************/
 
-int shutdown(int sockfd, int how)
+int ipv6_getsockopt(FAR struct socket *psock, int option,
+                    FAR void *value, FAR socklen_t *value_len)
 {
-  /* REVISIT: Not implemented. */
+  int ret;
 
-  return OK;
+  ninfo("option: %d\n", option);
+
+  net_lock();
+  switch (option)
+    {
+      case IPV6_TCLASS:
+        {
+          FAR struct socket_conn_s *conn =
+                           (FAR struct socket_conn_s *)psock->s_conn;
+
+          *(FAR uint8_t *)value = conn->s_tclass;
+          *value_len = 1;
+          ret = OK;
+        }
+        break;
+
+      default:
+        nerr("ERROR: Unrecognized IPv6 option: %d\n", option);
+        ret = -ENOPROTOOPT;
+        break;
+    }
+
+  net_unlock();
+  return ret;
 }
 
-#endif /* CONFIG_NET */
+#endif /* CONFIG_NET_IPv6 */
