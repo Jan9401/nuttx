@@ -83,8 +83,9 @@ static uint16_t recvfrom_event(FAR struct net_driver_s *dev,
           pstate->valuelen_nontrunc = conn->resp.valuelen_nontrunc;
         }
 
-      if (pstate->reqstate.result >= 0 ||
-          pstate->reqstate.result == -EAGAIN)
+      if (!(flags & USRSOCK_EVENT_RECVFROM_AVAIL) &&
+           (pstate->reqstate.result >= 0 ||
+            pstate->reqstate.result == -EAGAIN))
         {
           /* After reception of data, mark input not ready. Daemon will
            * send event to restore this flag.
@@ -174,7 +175,7 @@ static int do_recvfrom_request(FAR struct usrsock_conn_s *conn,
   bufs[0].iov_base = (FAR void *)&req;
   bufs[0].iov_len = sizeof(req);
 
-  return usrsock_do_request(conn, bufs, ARRAY_SIZE(bufs));
+  return usrsock_do_request(conn, bufs, nitems(bufs));
 }
 
 /****************************************************************************
@@ -384,7 +385,7 @@ ssize_t usrsock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       inbufs[1].iov_base = (FAR void *)buf;
       inbufs[1].iov_len = len;
 
-      usrsock_setup_datain(conn, inbufs, ARRAY_SIZE(inbufs));
+      usrsock_setup_datain(conn, inbufs, nitems(inbufs));
 
       /* MSG_DONTWAIT is only use in usrsock. */
 

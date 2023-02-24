@@ -110,6 +110,10 @@ struct mtd_geometry_s
   uint32_t erasesize;     /* Size of one erase blocks -- must be a multiple
                            * of blocksize. */
   uint32_t neraseblocks;  /* Number of erase blocks */
+
+  /* NULL-terminated string representing the device model */
+
+  char     model[NAME_MAX + 1];
 };
 
 /* This structure describes a range of sectors to be protected or
@@ -600,35 +604,6 @@ FAR struct mtd_dev_s *n25qxxx_initialize(FAR struct qspi_dev_s *qspi,
 
 FAR struct mtd_dev_s *w25qxxxjv_initialize(FAR struct qspi_dev_s *qspi,
                                          bool unprotect);
-
-/****************************************************************************
- * Name: blockmtd_initialize
- *
- * Description:
- *   Create and initialize a BLOCK MTD device instance.
- *
- * Input Parameters:
- *   path - Path name of the block device backing the MTD device
- *
- ****************************************************************************/
-
-FAR struct mtd_dev_s *blockmtd_initialize(FAR const char *path,
-                                          size_t offset, size_t mtdlen,
-                                          int16_t sectsize,
-                                          int32_t erasesize);
-
-/****************************************************************************
- * Name: blockmtd_teardown
- *
- * Description:
- *   Teardown a previously created blockmtd device.
- *
- * Input Parameters:
- *   dev - Pointer to the mtd driver instance.
- *
- ****************************************************************************/
-
-void blockmtd_teardown(FAR struct mtd_dev_s *dev);
 
 /****************************************************************************
  * Name: filemtd_initialize

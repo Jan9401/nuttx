@@ -47,7 +47,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int        local_setup(FAR struct socket *psock, int protocol);
+static int        local_setup(FAR struct socket *psock);
 static sockcaps_t local_sockcaps(FAR struct socket *psock);
 static void       local_addref(FAR struct socket *psock);
 static int        local_bind(FAR struct socket *psock,
@@ -161,7 +161,6 @@ static int local_sockif_alloc(FAR struct socket *psock)
  * Input Parameters:
  *   psock    A pointer to a user allocated socket structure
  *            to be initialized.
- *   protocol (see sys/socket.h)
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise, a negated errno value is
@@ -169,7 +168,7 @@ static int local_sockif_alloc(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-static int local_setup(FAR struct socket *psock, int protocol)
+static int local_setup(FAR struct socket *psock)
 {
   /* Allocate the appropriate connection structure.  This reserves the
    * connection structure, it is unallocated at this point.  It will not
@@ -183,7 +182,7 @@ static int local_setup(FAR struct socket *psock, int protocol)
     {
 #ifdef CONFIG_NET_LOCAL_STREAM
       case SOCK_STREAM:
-        if (protocol != 0 && protocol != IPPROTO_TCP)
+        if (psock->s_proto != 0 && psock->s_proto != IPPROTO_TCP)
           {
             return -EPROTONOSUPPORT;
           }
@@ -195,7 +194,7 @@ static int local_setup(FAR struct socket *psock, int protocol)
 
 #ifdef CONFIG_NET_LOCAL_DGRAM
       case SOCK_DGRAM:
-        if (protocol != 0 && protocol != IPPROTO_UDP)
+        if (psock->s_proto != 0 && psock->s_proto != IPPROTO_UDP)
           {
             return -EPROTONOSUPPORT;
           }
@@ -204,6 +203,19 @@ static int local_setup(FAR struct socket *psock, int protocol)
 
         return local_sockif_alloc(psock);
 #endif /* CONFIG_NET_LOCAL_DGRAM */
+
+#if defined(CONFIG_NET_LOCAL_STREAM) || defined(CONFIG_NET_LOCAL_DGRAM)
+      case SOCK_CTRL:
+        if (psock->s_proto == 0 || psock->s_proto == IPPROTO_TCP ||
+            psock->s_proto == IPPROTO_UDP)
+          {
+            /* Allocate and attach the local connection structure */
+
+            return local_sockif_alloc(psock);
+          }
+
+        return -EPROTONOSUPPORT;
+#endif
 
       default:
         return -EPROTONOSUPPORT;
@@ -304,6 +316,7 @@ static int local_bind(FAR struct socket *psock,
 #ifdef CONFIG_NET_LOCAL_DGRAM
       case SOCK_DGRAM:
 #endif
+      case SOCK_CTRL:
         {
           /* Bind the Unix domain connection structure */
 
@@ -644,6 +657,14 @@ static int local_connect(FAR struct socket *psock,
         break;
 #endif /* CONFIG_NET_LOCAL_DGRAM */
 
+#if defined(CONFIG_NET_LOCAL_STREAM) || defined(CONFIG_NET_LOCAL_DGRAM)
+      case SOCK_CTRL:
+        {
+          return -ENOSYS;
+        }
+        break;
+#endif
+
       default:
         return -EBADF;
     }
@@ -767,6 +788,7 @@ static int local_close(FAR struct socket *psock)
 #ifdef CONFIG_NET_LOCAL_DGRAM
       case SOCK_DGRAM:
 #endif
+      case SOCK_CTRL:
         {
           FAR struct local_conn_s *conn = psock->s_conn;
 
@@ -1015,6 +1037,10 @@ static int local_shutdown(FAR struct socket *psock, int how)
 #endif
 #ifdef CONFIG_NET_LOCAL_DGRAM
       case SOCK_DGRAM:
+        return -EOPNOTSUPP;
+#endif
+#if defined(CONFIG_NET_LOCAL_STREAM) || defined(CONFIG_NET_LOCAL_DGRAM)
+      case SOCK_CTRL:
         return -EOPNOTSUPP;
 #endif
       default:

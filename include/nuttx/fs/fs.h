@@ -237,6 +237,10 @@ struct geometry
   bool      geo_writeenabled; /* true: It is okay to write to this device */
   blkcnt_t  geo_nsectors;     /* Number of sectors on the device */
   blksize_t geo_sectorsize;   /* Size of one sector */
+
+  /* NULL-terminated string representing the device model */
+
+  char      geo_model[NAME_MAX + 1];
 };
 
 struct partition_info_s
@@ -810,7 +814,7 @@ int file_allocate(FAR struct inode *inode, int oflags, off_t pos,
  *
  ****************************************************************************/
 
-int file_dup(FAR struct file *filep, int minfd);
+int file_dup(FAR struct file *filep, int minfd, bool cloexec);
 
 /****************************************************************************
  * Name: file_dup2
@@ -1237,9 +1241,7 @@ off_t nx_seek(int fd, off_t offset, int whence);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
 int file_fsync(FAR struct file *filep);
-#endif
 
 /****************************************************************************
  * Name: file_truncate
@@ -1251,9 +1253,7 @@ int file_fsync(FAR struct file *filep);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
 int file_truncate(FAR struct file *filep, off_t length);
-#endif
 
 /****************************************************************************
  * Name: file_mmap

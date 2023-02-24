@@ -50,12 +50,6 @@ RUN mkdir bloaty -p \
   && cmake -DCMAKE_SYSTEM_PREFIX_PATH=/tools/bloaty \
   && make install
 
-RUN cd nuttx-tools \
-  && mkdir genromfs \
-  && tar -C genromfs --strip-components=1 -xf genromfs-0.5.2.tar.gz \
-  && cd genromfs \
-  && make install PREFIX=/tools/genromfs
-
 RUN cd nuttx-tools/kconfig-frontends \
   && ./configure --enable-mconf --disable-gconf --disable-qconf --enable-static --prefix=/tools/kconfig-frontends \
   && make install
@@ -239,12 +233,14 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   gcc \
   gcc-avr \
   gcc-multilib \
+  genromfs \
   gettext \
   git \
   lib32z1-dev \
   libasound2-dev libasound2-dev:i386 \
   libc6-dev-i386 \
   libcurl4-openssl-dev \
+  libmp3lame-dev:i386 \
   libmad0-dev:i386 \
   libncurses5-dev \
   libpulse-dev libpulse-dev:i386 \
@@ -275,13 +271,17 @@ ENV PIP_NO_CACHE_DIR=0
 # We are using the minimal python installation from the system so include
 # setuptools and also wheel so we can use the binary releases of packages
 # instead of requiring them to be compiled.
-RUN pip3 install setuptools wheel
+RUN pip3 install setuptools
+RUN pip3 install wheel
 # Install CodeChecker and use it to statically analyze the code.
 RUN pip3 install CodeChecker
+# Install cvt2utf to check for non-UTF characters.
+RUN pip3 install cvt2utf
 # Install pytest
 RUN pip3 install cxxfilt
 RUN pip3 install esptool
 RUN pip3 install imgtool
+RUN pip3 install kconfiglib
 RUN pip3 install pexpect==4.8.0
 RUN pip3 install pyelftools
 RUN pip3 install pyserial==3.5
@@ -297,8 +297,6 @@ WORKDIR /tools
 # Pull in the tools we just built for nuttx
 COPY --from=nuttx-tools /tools/bloaty/ bloaty/
 ENV PATH="/tools/bloaty/bin:$PATH"
-COPY --from=nuttx-tools /tools/genromfs/ /tools/genromfs/
-ENV PATH="/tools/genromfs/usr/bin:$PATH"
 COPY --from=nuttx-tools /tools/kconfig-frontends/ kconfig-frontends/
 ENV PATH="/tools/kconfig-frontends/bin:$PATH"
 
