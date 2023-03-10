@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm64/src/common/arm64_cpuindex.c
+ * boards/arm64/fvp-v8r/fvp-armv8r/src/fvp-armv8r.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,6 +18,9 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_ARM64_VDK_ARMV8R_BASE_SRC_VDK_ARMV8R_H__
+#define __BOARDS_ARM64_VDK_ARMV8R_BASE_SRC_VDK_ARMV8R_H__
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -26,43 +29,31 @@
 
 #include <stdint.h>
 
-#include <nuttx/arch.h>
-
-#include "arm64_arch.h"
-
-#ifdef CONFIG_SMP
-
 /****************************************************************************
- * Public Functions
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_cpu_index
+ * Public Data
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/****************************************************************************
+ * Public Functions Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: vdk_bringup
  *
  * Description:
- *   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
- *
- *   If TLS is enabled, then the RTOS can get this information from the TLS
- *   info structure.  Otherwise, the MCU-specific logic must provide some
- *   mechanism to provide the CPU index.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
+ *   Bring up board features
  *
  ****************************************************************************/
 
-int up_cpu_index(void)
-{
-  /* Read the Multiprocessor Affinity Register (MPIDR)
-   * And return the CPU ID field
-   */
+#if defined(CONFIG_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
+int fvp_bringup(void);
+#endif
 
-  return MPIDR_TO_CORE(GET_MPIDR());
-}
-
-#endif /* CONFIG_SMP */
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_ARM64_VDK_ARMV8R_BASE_SRC_VDK_ARMV8R_H__ */
