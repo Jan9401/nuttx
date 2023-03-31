@@ -127,4 +127,32 @@
                                GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(20))
 #endif
 
+/* PWM Pins *****************************************************************/
+
+/* PWM 0:
+ *   PWM0 CH0 - P1.10
+ *   PWM0 CH1 - P1.11
+ *   PWM0 CH2 - P1.12
+ *   PWM0 CH3 - P1.13
+ */
+
+#define NRF53_PWM0_CH0_PIN (GPIO_MCUSEL_APP | GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN(10))
+#define NRF53_PWM0_CH1_PIN (GPIO_MCUSEL_APP | GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN(11))
+#define NRF53_PWM0_CH2_PIN (GPIO_MCUSEL_APP | GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN(12))
+#define NRF53_PWM0_CH3_PIN (GPIO_MCUSEL_APP | GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN(13))
+
+/* ADC Pins *****************************************************************/
+
+/* ADC
+ *   ADC CH0 - P0.04 - AIN1
+ *   ADC CH1 - P0.05 - AIN2
+ *   ADC CH2 - P0.06 - AIN4
+ *   ADC CH3 - P0.07 - AIN5
+ */
+
+#define NRF53_ADC_CH0_PIN (GPIO_MCUSEL_APP | GPIO_INPUT | GPIO_PORT0 | GPIO_PIN(4))
+#define NRF53_ADC_CH1_PIN (GPIO_MCUSEL_APP | GPIO_INPUT | GPIO_PORT0 | GPIO_PIN(5))
+#define NRF53_ADC_CH2_PIN (GPIO_MCUSEL_APP | GPIO_INPUT | GPIO_PORT0 | GPIO_PIN(6))
+#define NRF53_ADC_CH3_PIN (GPIO_MCUSEL_APP | GPIO_INPUT | GPIO_PORT0 | GPIO_PIN(7))
+
 #endif /* __BOARDS_ARM_NRF53_NRF5340_DK_INCLUDE_BOARD_H */

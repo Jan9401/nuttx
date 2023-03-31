@@ -31,6 +31,10 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
+#ifdef CONFIG_INPUT_BUTTONS
+#  include <nuttx/input/buttons.h>
+#endif
+
 #ifdef CONFIG_NRF53_SOFTDEVICE_CONTROLLER
 #  include "nrf53_sdc.h"
 #endif
@@ -38,6 +42,14 @@
 #ifdef CONFIG_RPTUN
 #  include "nrf53_rptun.h"
 #endif
+
+#include "nrf5340-dk.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define NRF53_TIMER (0)
 
 /****************************************************************************
  * Public Functions
@@ -71,12 +83,58 @@ int nrf53_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_INPUT_BUTTONS
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_RPTUN
 #ifdef CONFIG_NRF53_APPCORE
   nrf53_rptun_init("nrf53-shmem", "appcore");
 #else
   nrf53_rptun_init("nrf53-shmem", "netcore");
 #endif
+#endif
+
+#if defined(CONFIG_TIMER) && defined(CONFIG_NRF53_TIMER)
+  /* Configure TIMER driver */
+
+  ret = nrf53_timer_driver_setup("/dev/timer0", NRF53_TIMER);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize timer driver: %d\n",
+             ret);
+    }
+#endif
+
+#ifdef CONFIG_PWM
+  /* Configure PWM driver */
+
+  ret = nrf53_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize PWM driver: %d\n",
+             ret);
+    }
+#endif
+
+#ifdef CONFIG_ADC
+  /* Configure ADC driver */
+
+  ret = nrf53_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize ADC driver: %d\n",
+             ret);
+    }
 #endif
 
 #ifdef CONFIG_NRF53_SOFTDEVICE_CONTROLLER
