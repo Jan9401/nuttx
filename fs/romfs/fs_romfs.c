@@ -113,7 +113,7 @@ static int     romfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
  * with any compiler.
  */
 
-const struct mountpt_operations romfs_operations =
+const struct mountpt_operations g_romfs_operations =
 {
   romfs_open,      /* open */
   romfs_close,     /* close */
@@ -599,8 +599,8 @@ static int romfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   if (cmd == FIOC_FILEPATH)
     {
       FAR char *ptr = (FAR char *)((uintptr_t)arg);
-      inode_getpath(filep->f_inode, ptr);
-      strcat(ptr, rf->rf_path);
+      inode_getpath(filep->f_inode, ptr, PATH_MAX);
+      strlcat(ptr, rf->rf_path, PATH_MAX);
       return OK;
     }
 

@@ -40,6 +40,14 @@
 #include "littlefs/lfs_util.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_C99_BOOL
+#  error littlefs requires CONFIG_C99_BOOL to be selected
+#endif
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -132,7 +140,7 @@ static int     littlefs_stat(FAR struct inode *mountpt,
  * with any compiler.
  */
 
-const struct mountpt_operations littlefs_operations =
+const struct mountpt_operations g_littlefs_operations =
 {
   littlefs_open,          /* open */
   littlefs_close,         /* close */

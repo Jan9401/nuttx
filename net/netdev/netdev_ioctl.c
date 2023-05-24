@@ -839,6 +839,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 
       case SIOCSIFADDR:  /* Set IP address */
         ioctl_set_ipv4addr(&dev->d_ipaddr, &req->ifr_addr);
+        netlink_device_notify_ipaddr(dev, RTM_NEWADDR, AF_INET);
         break;
 
       case SIOCGIFDSTADDR:  /* Get P-to-P address */
@@ -879,6 +880,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
         {
           FAR struct lifreq *lreq = (FAR struct lifreq *)req;
           ioctl_set_ipv6addr(dev->d_ipv6addr, &lreq->lifr_addr);
+          netlink_device_notify_ipaddr(dev, RTM_NEWADDR, AF_INET6);
         }
         break;
 
@@ -918,13 +920,13 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 
       case SIOCGLIFMTU:  /* Get MTU size */
       case SIOCGIFMTU:   /* Get MTU size */
-        req->ifr_mtu = NETDEV_PKTSIZE(dev);
+        req->ifr_mtu = NETDEV_PKTSIZE(dev) - dev->d_llhdrlen;
         break;
       case SIOCSIFMTU:   /* Set MTU size */
         dev = netdev_ifr_dev(req);
         if (dev)
           {
-            NETDEV_PKTSIZE(dev) = req->ifr_mtu;
+            NETDEV_PKTSIZE(dev) = req->ifr_mtu + dev->d_llhdrlen;
           }
         break;
 
@@ -1040,9 +1042,11 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
       case SIOCDIFADDR:  /* Delete IP address */
 #ifdef CONFIG_NET_IPv4
         dev->d_ipaddr = 0;
+        netlink_device_notify_ipaddr(dev, RTM_DELADDR, AF_INET);
 #endif
 #ifdef CONFIG_NET_IPv6
         memset(&dev->d_ipv6addr, 0, sizeof(net_ipv6addr_t));
+        netlink_device_notify_ipaddr(dev, RTM_DELADDR, AF_INET6);
 #endif
         break;
 

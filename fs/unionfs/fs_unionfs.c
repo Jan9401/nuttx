@@ -206,7 +206,7 @@ static int     unionfs_dobind(FAR const char *fspath1,
  * with any compiler.
  */
 
-const struct mountpt_operations unionfs_operations =
+const struct mountpt_operations g_unionfs_operations =
 {
   unionfs_open,        /* open */
   unionfs_close,       /* close */
@@ -869,7 +869,7 @@ static int unionfs_open(FAR struct file *filep, FAR const char *relpath,
   /* Allocate a container to hold the open file system information */
 
   uf = (FAR struct unionfs_file_s *)
-    kmm_malloc(sizeof(struct unionfs_file_s));
+    kmm_zalloc(sizeof(struct unionfs_file_s));
   if (uf == NULL)
     {
       ret = -ENOMEM;
@@ -883,9 +883,7 @@ static int unionfs_open(FAR struct file *filep, FAR const char *relpath,
               um->um_node->u.i_mops != NULL);
 
   uf->uf_file.f_oflags = filep->f_oflags;
-  uf->uf_file.f_pos    = 0;
   uf->uf_file.f_inode  = um->um_node;
-  uf->uf_file.f_priv   = NULL;
 
   ret = unionfs_tryopen(&uf->uf_file, relpath, um->um_prefix, oflags, mode);
   if (ret >= 0)
@@ -901,9 +899,7 @@ static int unionfs_open(FAR struct file *filep, FAR const char *relpath,
       um  = &ui->ui_fs[1];
 
       uf->uf_file.f_oflags = filep->f_oflags;
-      uf->uf_file.f_pos    = 0;
       uf->uf_file.f_inode  = um->um_node;
-      uf->uf_file.f_priv   = NULL;
 
       ret = unionfs_tryopen(&uf->uf_file, relpath, um->um_prefix, oflags,
                             mode);
@@ -2733,7 +2729,7 @@ int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
 
   INODE_SET_MOUNTPT(mpinode);
 
-  mpinode->u.i_mops = &unionfs_operations;
+  mpinode->u.i_mops = &g_unionfs_operations;
 
   /* Call unionfs_dobind to do the real work. */
 

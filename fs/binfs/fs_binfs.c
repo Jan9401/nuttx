@@ -37,7 +37,6 @@
 #include <debug.h>
 
 #include <nuttx/fs/fs.h>
-#include <nuttx/fs/binfs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/lib/builtin.h>
 
@@ -101,7 +100,7 @@ static int     binfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
  * with any compiler.
  */
 
-const struct mountpt_operations binfs_operations =
+const struct mountpt_operations g_binfs_operations =
 {
   binfs_open,        /* open */
   binfs_close,       /* close */
@@ -225,13 +224,14 @@ static int binfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
       else
         {
-          ret = inode_getpath(filep->f_inode, ptr);
+          ret = inode_getpath(filep->f_inode, ptr, PATH_MAX);
           if (ret < 0)
             {
               return ret;
             }
 
-          strcat(ptr, builtin_getname((int)((uintptr_t)filep->f_priv)));
+          strlcat(ptr, builtin_getname((int)((uintptr_t)filep->f_priv)),
+                  PATH_MAX);
         }
     }
   else

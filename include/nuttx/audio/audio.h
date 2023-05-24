@@ -205,11 +205,12 @@
 #define AUDIO_SAMP_RATE_32K         0x0010
 #define AUDIO_SAMP_RATE_44K         0x0020
 #define AUDIO_SAMP_RATE_48K         0x0040
-#define AUDIO_SAMP_RATE_96K         0x0080
-#define AUDIO_SAMP_RATE_128K        0x0100
-#define AUDIO_SAMP_RATE_160K        0x0200
-#define AUDIO_SAMP_RATE_172K        0x0400
-#define AUDIO_SAMP_RATE_192K        0x0800
+#define AUDIO_SAMP_RATE_88K         0x0080
+#define AUDIO_SAMP_RATE_96K         0x0100
+#define AUDIO_SAMP_RATE_128K        0x0200
+#define AUDIO_SAMP_RATE_160K        0x0400
+#define AUDIO_SAMP_RATE_172K        0x0800
+#define AUDIO_SAMP_RATE_192K        0x1000
 
 /* Audio Sub-sampling Ratios  ***********************************************/
 
@@ -332,6 +333,7 @@
 #define AUDIO_MSG_WAKEUP            9
 #define AUDIO_MSG_COMMAND          10
 #define AUDIO_MSG_SLIENCE          11
+#define AUDIO_MSG_UNDERRUN         12
 #define AUDIO_MSG_USER             64
 
 /* Audio Pipeline Buffer flags */
@@ -482,7 +484,7 @@ struct audio_buf_desc_s
 #ifdef CONFIG_AUDIO_MULTI_SESSION
   FAR void            *session;           /* Associated channel */
 #endif
-  uint16_t            numbytes;           /* Number of bytes to allocate */
+  apb_samp_t          numbytes;           /* Number of bytes to allocate */
   union
   {
     FAR struct ap_buffer_s  *buffer;     /* Buffer to free / enqueue */

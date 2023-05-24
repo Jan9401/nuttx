@@ -342,7 +342,7 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
                 }
 
               conn->recvdata = NULL;
-              nxsem_post(&conn->recvsem);
+              rpmsg_socket_post(&conn->recvsem);
             }
 
           if (len > 0)
@@ -518,6 +518,7 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
       return;
     }
 
+  new->rpaddr.rp_family = AF_RPMSG;
   strlcpy(new->rpaddr.rp_cpu, rpmsg_get_cpuname(rdev),
           sizeof(new->rpaddr.rp_cpu));
   strlcpy(new->rpaddr.rp_name, name + RPMSG_SOCKET_NAME_PREFIX_LEN,
@@ -1248,6 +1249,7 @@ static ssize_t rpmsg_socket_recvmsg(FAR struct socket *psock,
   conn->recvdata = buf;
   conn->recvlen  = len;
 
+  nxsem_reset(&conn->recvsem, 0);
   nxmutex_unlock(&conn->recvlock);
 
   ret = net_sem_timedwait(&conn->recvsem,

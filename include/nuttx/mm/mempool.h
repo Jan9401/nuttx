@@ -90,9 +90,6 @@ struct mempool_s
   size_t     expandsize;    /* The size of expand block every time for mempool */
   bool       wait;          /* The flag of need to wait when mempool is empty */
   FAR void  *priv;          /* This pointer is used to store the user's private data */
-  bool       calibrate;     /* The flag is use expend memory calibration
-                             * real memory usage
-                             */
   mempool_alloc_t alloc;    /* The alloc function for mempool */
   mempool_free_t  free;     /* The free function for mempool */
 
@@ -121,6 +118,7 @@ struct mempool_backtrace_s
 {
   struct list_node node;
   pid_t pid;
+  unsigned long seqno; /* The sequence of memory malloc */
 #  if CONFIG_MM_BACKTRACE > 0
   FAR void *backtrace[CONFIG_MM_BACKTRACE];
 #  endif
@@ -232,13 +230,14 @@ int mempool_info(FAR struct mempool_s *pool, FAR struct mempoolinfo_s *info);
  *
  * Input Parameters:
  *   pool    - Address of the memory pool to be used.
- *   info    - The pointer of mempoolinfo.
+ *   dump    - The information of what need dump.
  *
  * Returned Value:
  *   OK on success; A negated errno value on any failure.
  ****************************************************************************/
 
-void mempool_memdump(FAR struct mempool_s *pool, pid_t pid);
+void mempool_memdump(FAR struct mempool_s *pool,
+                     FAR const struct mm_memdump_s *dump);
 
 /****************************************************************************
  * Name: mempool_deinit
@@ -260,11 +259,15 @@ int mempool_deinit(FAR struct mempool_s *pool);
  *
  * Input Parameters:
  *   pool    - Address of the memory pool to be used.
- *   info    - Memory info.
+ *   dump    - The information of what need dump.
+ *
+ * Returned Value:
+ *   Statistics of memory information based on dump.
  ****************************************************************************/
 
-int mempool_info_task(FAR struct mempool_s *pool,
-                      FAR struct mempoolinfo_task *info);
+struct mempoolinfo_task
+mempool_info_task(FAR struct mempool_s *pool,
+                  FAR const struct mm_memdump_s *dump);
 
 /****************************************************************************
  * Name: mempool_procfs_register
@@ -320,7 +323,6 @@ void mempool_procfs_unregister(FAR struct mempool_procfs_entry_s *entry);
  *   arg             - The alloc & free memory fuctions used arg.
  *   expandsize      - The expend mempry for all pools in multiples pool.
  *   dict_expendsize - The expend size for multiple dictnoary.
- *   calibrate       - Whether to calibrate when counting memory usage.
  * Returned Value:
  *   Return an initialized multiple pool pointer on success,
  *   otherwise NULL is returned.
@@ -335,7 +337,7 @@ mempool_multiple_init(FAR const char *name,
                       mempool_multiple_alloc_t alloc,
                       mempool_multiple_free_t free,
                       FAR void *arg, size_t expandsize,
-                      size_t dict_expendsize, bool calibrate);
+                      size_t dict_expendsize);
 
 /****************************************************************************
  * Name: mempool_multiple_alloc
@@ -458,12 +460,12 @@ FAR void *mempool_multiple_memalign(FAR struct mempool_multiple_s *mpool,
  *
  * Input Parameters:
  *   mpool - The handle of multiple memory pool to be used.
- *   pid   - The pid of task.
+ *   dump  - The information of what need dump.
  *
  ****************************************************************************/
 
 void mempool_multiple_memdump(FAR struct mempool_multiple_s *mpool,
-                              pid_t pid);
+                              FAR const struct mm_memdump_s *dump);
 
 /****************************************************************************
  * Name: mempool_multiple_deinit
@@ -479,17 +481,29 @@ void mempool_multiple_memdump(FAR struct mempool_multiple_s *mpool,
 void mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool);
 
 /****************************************************************************
+  * Name: mempool_multiple_info
+ * Description:
+ *   Dump multiple memory pool's info.
+ ****************************************************************************/
+
+void mempool_multiple_info(FAR struct mempool_multiple_s *mpool);
+
+/****************************************************************************
  * Name: mempool_multiple_info_task
  * Description:
  *   Get multiple memory pool's memory used info.
  *
  * Input Parameters:
  *   mpool - The handle of multiple memory pool to be used.
- *   info  - Memory info.
+ *   dump  - The information of what need dump.
+ *
+ * Returned Value:
+ *    Statistics of memory information based on dump.
  ****************************************************************************/
 
-void mempool_multiple_info_task(FAR struct mempool_multiple_s *mpool,
-                                FAR struct mempoolinfo_task *info);
+struct mempoolinfo_task
+mempool_multiple_info_task(FAR struct mempool_multiple_s *mpool,
+                           FAR const struct mm_memdump_s *dump);
 
 #undef EXTERN
 #if defined(__cplusplus)

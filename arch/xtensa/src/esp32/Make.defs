@@ -34,7 +34,7 @@ endif
 CHIP_CSRCS  = esp32_allocateheap.c esp32_clockconfig.c esp32_gpio.c
 CHIP_CSRCS += esp32_systemreset.c esp32_resetcause.c
 CHIP_CSRCS += esp32_irq.c esp32_region.c esp32_rtc_gpio.c
-CHIP_CSRCS += esp32_user.c
+CHIP_CSRCS += esp32_user.c esp32_libc_stubs.c
 CHIP_CSRCS += esp32_dma.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
@@ -232,7 +232,9 @@ ifeq ($(CONFIG_ESP32_WIFI),y)
 CHIP_CSRCS += esp32_wlan.c esp32_wifi_utils.c esp32_wifi_adapter.c
 EXTRA_LIBS += -lcore -lnet80211 -lpp -lsmartconfig -lespnow -lwpa_supplicant
 
-GCCVER = $(shell $(CC) --version | grep gcc | sed -r 's/.* ([0-9]+\.[0-9]+).*/\1/')
+ifeq ($(GCCVER),)
+  export GCCVER := $(shell $(CC) --version | grep gcc | sed -r 's/.* ([0-9]+\.[0-9]+).*/\1/')
+endif
 ifeq ($(GCCVER),12.2)
   chip/esp32_wifi_adapter.c_CFLAGS += -Wno-maybe-uninitialized
 endif

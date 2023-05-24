@@ -244,7 +244,7 @@ static int     proc_stat(FAR const char *relpath, FAR struct stat *buf);
  * with any compiler.
  */
 
-const struct procfs_operations proc_operations =
+const struct procfs_operations g_proc_operations =
 {
   proc_open,          /* open */
   proc_close,         /* close */
@@ -762,6 +762,7 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
                             size_t buflen, off_t offset)
 {
   struct timespec maxtime;
+  struct timespec runtime;
   size_t remaining;
   size_t linesize;
   size_t copysize;
@@ -851,12 +852,18 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
   /* Reset the maximum */
 
   tcb->run_max = 0;
+  up_perf_convert(tcb->run_time, &runtime);
 
-  /* Generate output for maximum time thread running */
+  /* Output the maximum time the thread has run and
+   * the total time the thread has run
+   */
 
-  linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu\n",
+  linesize = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                             "%lu.%09lu,%lu.%09lu\n",
                              (unsigned long)maxtime.tv_sec,
-                             (unsigned long)maxtime.tv_nsec);
+                             (unsigned long)maxtime.tv_nsec,
+                             (unsigned long)runtime.tv_sec,
+                             (unsigned long)(runtime.tv_nsec));
   copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                            &offset);
 
@@ -879,16 +886,20 @@ static ssize_t proc_heap(FAR struct proc_file_s *procfile,
   size_t copysize;
   size_t totalsize = 0;
   struct mallinfo_task info;
+  struct mm_memdump_s dump;
 
+  dump.pid = tcb->pid;
+  dump.seqmin = 0;
+  dump.seqmax = ULONG_MAX;
 #ifdef CONFIG_MM_KERNEL_HEAP
   if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
     {
-      info = kmm_mallinfo_task(tcb->pid);
+      info = kmm_mallinfo_task(&dump);
     }
   else
 #endif
     {
-      info = mallinfo_task(tcb->pid);
+      info = mallinfo_task(&dump);
     }
 
   /* Show the heap alloc size */

@@ -465,8 +465,8 @@ struct efm32_usbdev_s
 static uint32_t    efm32_getreg(uint32_t addr);
 static void        efm32_putreg(uint32_t val, uint32_t addr);
 #else
-# define efm32_getreg(addr)     getreg32(addr)
-# define efm32_putreg(val,addr) putreg32(val,addr)
+#  define efm32_getreg(addr)     getreg32(addr)
+#  define efm32_putreg(val,addr) putreg32(val,addr)
 #endif
 
 /* Request queue operations *************************************************/
@@ -1341,7 +1341,7 @@ static void efm32_epin_request(struct efm32_usbdev_s *priv,
            * request. If not, raise an assertion here.
            */
 
-          regval = emf32_putreg(regval, EMF32_USB_DIEPTXF(privep->epphy));
+          regval = efm32_getreg(EFM32_USB_DIEPTXF(privep->epphy));
           regval &= _USB_DIEPTXF1_INEPNTXFDEP_MASK;
           regval >>= _USB_DIEPTXF1_INEPNTXFDEP_SHIFT;
           uerr("EP%" PRId8 " TXLEN=%" PRId32 " nwords=%d\n",

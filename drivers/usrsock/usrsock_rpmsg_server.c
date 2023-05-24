@@ -48,6 +48,7 @@
 struct usrsock_rpmsg_s
 {
   rmutex_t                  mutex;
+  ssize_t                   remain;
   struct iovec              iov[CONFIG_NET_USRSOCK_RPMSG_SERVER_NIOVEC];
   struct socket             socks[CONFIG_NET_USRSOCK_RPMSG_SERVER_NSOCKS];
   FAR struct rpmsg_endpoint *epts[CONFIG_NET_USRSOCK_RPMSG_SERVER_NSOCKS];
@@ -382,21 +383,28 @@ static int usrsock_rpmsg_sendto_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct usrsock_rpmsg_s *priv = priv_;
   uint16_t events = 0;
   ssize_t ret = -EBADF;
-  size_t total;
   int retr;
   int i;
 
-  if (priv->iov[0].iov_base)
+  if (priv->remain > 0)
     {
       size_t hlen;
       struct msghdr msg =
       {
       };
 
+      priv->remain -= len;
+
+      if (!priv->iov[0].iov_base)
+        {
+          /* Maybe error occurred previously, skip processing. */
+
+          return 0;
+        }
+
       req = priv->iov[0].iov_base;
       hlen = sizeof(*req) + req->addrlen;
 
-      total = len;
       for (i = 0; i < CONFIG_NET_USRSOCK_RPMSG_SERVER_NIOVEC; i++)
         {
           if (!priv->iov[i].iov_base)
@@ -406,23 +414,24 @@ static int usrsock_rpmsg_sendto_handler(FAR struct rpmsg_endpoint *ept,
               rpmsg_hold_rx_buffer(ept, data);
               break;
             }
-
-          total += priv->iov[i].iov_len;
-        }
-
-      if (i == CONFIG_NET_USRSOCK_RPMSG_SERVER_NIOVEC)
-        {
-          ret = -ENOMEM;
-          goto out;
         }
 
       /* Partial packet ? continue to fetch */
 
-      if (req->buflen > total - hlen)
+      if (priv->remain > 0)
         {
+          /* We've used the last I/O vector, cannot continue. */
+
+          if (i == CONFIG_NET_USRSOCK_RPMSG_SERVER_NIOVEC - 1)
+            {
+              nerr("ERROR: Request %d too large!\n", req->usockid);
+              ret = -ENOMEM;
+              goto out;
+            }
+
           return 0;
         }
-      else if (req->buflen < total - hlen)
+      else if (priv->remain < 0)
         {
           ret = -EINVAL;
           goto out;
@@ -452,14 +461,18 @@ static int usrsock_rpmsg_sendto_handler(FAR struct rpmsg_endpoint *ept,
       if (req->usockid >= 0 &&
           req->usockid < CONFIG_NET_USRSOCK_RPMSG_SERVER_NSOCKS)
         {
-          total = sizeof(*req) + req->addrlen + req->buflen;
-          if (total > len)
+          priv->remain = sizeof(*req) + req->addrlen + req->buflen - len;
+          if (priv->remain > 0)
             {
+#if CONFIG_NET_USRSOCK_RPMSG_SERVER_NIOVEC >= 2
               priv->iov[0].iov_base = data;
               priv->iov[0].iov_len = len;
 
               rpmsg_hold_rx_buffer(ept, data);
               return 0;
+#else
+              ret = -ENOMEM;
+#endif
             }
           else
             {
@@ -483,7 +496,8 @@ out:
   retr = usrsock_rpmsg_send_ack(ept, events, req->head.xid, ret);
   if (retr >= 0 && events == 0)
     {
-      usrsock_rpmsg_poll_setup(&priv->pfds[req->usockid], POLLOUT);
+      usrsock_rpmsg_poll_setup(&priv->pfds[req->usockid],
+                               priv->pfds[req->usockid].events | POLLOUT);
     }
 
   if (priv->iov[0].iov_base)
@@ -495,9 +509,9 @@ out:
               break;
             }
 
-            rpmsg_release_rx_buffer(ept, priv->iov[i].iov_base);
-            priv->iov[i].iov_base = NULL;
-            priv->iov[i].iov_len = 0;
+          rpmsg_release_rx_buffer(ept, priv->iov[i].iov_base);
+          priv->iov[i].iov_base = NULL;
+          priv->iov[i].iov_len = 0;
         }
     }
 
@@ -627,7 +641,8 @@ static int usrsock_rpmsg_recvfrom_handler(FAR struct rpmsg_endpoint *ept,
 
   if (retr >= 0 && events == 0)
     {
-      usrsock_rpmsg_poll_setup(&priv->pfds[req->usockid], POLLIN);
+      usrsock_rpmsg_poll_setup(&priv->pfds[req->usockid],
+                               priv->pfds[req->usockid].events | POLLIN);
     }
 
   return retr;
@@ -1010,7 +1025,7 @@ static int usrsock_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
   FAR struct usrsock_request_common_s *common = data;
   FAR struct usrsock_rpmsg_s *priv = priv_;
 
-  if (priv->iov[0].iov_base)
+  if (priv->remain > 0)
     {
       return usrsock_rpmsg_sendto_handler(ept, data, len, src, priv);
     }
@@ -1041,15 +1056,20 @@ static void usrsock_rpmsg_poll_setup(FAR struct pollfd *pfds,
 
   if (events)
     {
-      if (!pfds->events)
+      if (pfds->events)
         {
+          ret = psock_poll(psock, pfds, false);
+        }
+
+      if (ret >= 0)
+        {
+          /* The protocol stack monitor flag is different when the events is
+           * POLLIN or POLLOUT, so we have to call poll_setup again.
+           */
+
           pfds->revents = 0;
           pfds->events = events;
           ret = psock_poll(psock, pfds, true);
-        }
-      else
-        {
-          pfds->events = events;
         }
     }
   else
@@ -1114,13 +1134,9 @@ static void usrsock_rpmsg_poll_cb(FAR struct pollfd *pfds)
         }
     }
 
-  if (!(pfds->events & (POLLIN | POLLOUT)))
-    {
-      usrsock_rpmsg_poll_setup(pfds, 0);
-    }
-
   if (events != 0)
     {
+      usrsock_rpmsg_poll_setup(pfds, pfds->events);
       usrsock_rpmsg_send_event(priv->epts[pfds->fd], pfds->fd, events);
     }
 

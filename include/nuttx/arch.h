@@ -1458,6 +1458,36 @@ void up_secure_irq_all(bool secure);
 #endif
 
 /****************************************************************************
+ * Function:  up_adj_timer_period
+ *
+ * Description:
+ *   Adjusts timer period. This call is used when adjusting timer period as
+ *   defined in adjtime() function.
+ *
+ * Input Parameters:
+ *   period_inc_usec  - period adjustment in usec (reset to default value
+ *                      if 0)
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CLOCK_ADJTIME
+void up_adj_timer_period(long long period_inc_usec);
+
+/****************************************************************************
+ * Function:  up_get_timer_period
+ *
+ * Description:
+ *   This function returns the timer period in usec.
+ *
+ * Input Parameters:
+ *   period_usec  - returned timer period in usec
+ *
+ ****************************************************************************/
+
+void up_get_timer_period(long long *period_usec);
+#endif
+
+/****************************************************************************
  * Function:  up_timer_initialize
  *
  * Description:
@@ -1726,14 +1756,14 @@ int up_timer_tick_start(clock_t ticks);
  * Name: up_getusrsp
  *
  * Input Parameters:
- *   None
+ *   regs - regs to get sp
  *
  * Returned Value:
  *   User stack pointer.
  *
  ****************************************************************************/
 
-uintptr_t up_getusrsp(void);
+uintptr_t up_getusrsp(FAR void *regs);
 
 /****************************************************************************
  * TLS support
@@ -2526,9 +2556,9 @@ void arch_sporadic_resume(FAR struct tcb_s *tcb);
  ****************************************************************************/
 
 void up_perf_init(FAR void *arg);
-uint32_t up_perf_gettime(void);
-uint32_t up_perf_getfreq(void);
-void up_perf_convert(uint32_t elapsed, FAR struct timespec *ts);
+unsigned long up_perf_gettime(void);
+unsigned long up_perf_getfreq(void);
+void up_perf_convert(unsigned long elapsed, FAR struct timespec *ts);
 
 /****************************************************************************
  * Name: up_saveusercontext
