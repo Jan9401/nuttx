@@ -189,6 +189,16 @@ config MM_SHM
 		Build in support for the shared memory interfaces shmget(), shmat(),
 		shmctl(), and shmdt().
 
+config MM_KMAP
+	bool "Support for dynamic kernel virtual mappings"
+	default n
+	depends on MM_PGALLOC && BUILD_KERNEL
+	select ARCH_VMA_MAPPING
+	---help---
+		Build support for dynamically mapping pages from the page pool into
+		kernel virtual memory. This includes pages that are already mapped
+		for user.
+
 config MM_HEAP_MEMPOOL_THRESHOLD
 	int "The size of threshold to avoid using multiple mempool in heap"
 	default 0
@@ -297,6 +307,11 @@ config MM_DUMP_ON_FAILURE
 	bool "Dump heap info on allocation failure"
 	default n
 	depends on DEBUG_MM
+
+config MM_DUMP_DETAILS_ON_FAILURE
+	bool "Dump all used memory blocks on allocation failure"
+	default n
+	depends on MM_DUMP_ON_FAILURE
 
 config MM_PANIC_ON_FAILURE
 	bool "Panic on allocation failure"
