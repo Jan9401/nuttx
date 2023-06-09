@@ -192,7 +192,7 @@ static void mpfs_spi_enable(struct mpfs_spi_priv_s *priv, uint8_t enable);
 static const struct mpfs_spi_config_s mpfs_spi_config =
 {
   .clk_freq = MPFS_SPI_FREQ_DEFAULT,
-  .mode     = SPIDEV_MODE0,
+  .mode     = SPIDEV_MODE3,
   .nbits    = 8,
   .use_irq  = true,
 };
@@ -540,7 +540,7 @@ static uint32_t mpfs_spi_setfrequency(struct spi_dev_s *dev,
   divider = ((MPFS_FPGA_PERIPHERAL_CLK / frequency) >> 1) - 1;
   priv->actual = MPFS_FPGA_PERIPHERAL_CLK / ((divider + 1) << 1);
 
-  DEBUGASSERT(divider >= 2u && divider <= 512u);
+  DEBUGASSERT(divider < 256u);
 
   putreg32(divider, MPFS_SPI_CLK_GEN);
 
