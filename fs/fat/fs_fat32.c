@@ -2333,7 +2333,6 @@ static int fat_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 
   /* Fill in the statfs info */
 
-  memset(buf, 0, sizeof(struct statfs));
   buf->f_type    = MSDOS_SUPER_MAGIC;
 
   /* We will claim that the optimal transfer size is the size of a cluster
@@ -2644,7 +2643,7 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-int fat_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
+static int fat_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
 {
   FAR struct fat_mountpt_s *fs;
   int ret;
@@ -2692,8 +2691,8 @@ int fat_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
  *
  ****************************************************************************/
 
-int fat_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
-               FAR const char *newrelpath)
+static int fat_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
+                      FAR const char *newrelpath)
 {
   FAR struct fat_mountpt_s *fs;
   FAR struct fat_dirinfo_s dirinfo;

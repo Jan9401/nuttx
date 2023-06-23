@@ -18,3 +18,5 @@ Guides
   customapps.rst
   zerolatencyinterrupts.rst
   nestedinterrupts.rst
+  cortexmhardfaults.rst
+  coredump.rst
