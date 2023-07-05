@@ -61,13 +61,16 @@
 #undef  _POSIX_FSYNC
 #define _POSIX_SYNCHRONIZED_IO 1
 
+#define _POSIX_VERSION 201712L
+#define _POSIX_PRIORITIZED_IO _POSIX_VERSION
+#define _POSIX_CPUTIME _POSIX_VERSION
+#define _POSIX_THREAD_CPUTIME _POSIX_VERSION
+
 #ifdef CONFIG_FS_AIO
-#  define _POSIX_ASYNCHRONOUS_IO 1
+#  define _POSIX_ASYNCHRONOUS_IO _POSIX_VERSION
 #else
 #  undef  _POSIX_ASYNCHRONOUS_IO
 #endif
-
-#undef  _POSIX_PRIORITIZED_IO
 
 #ifdef CONFIG_SCHED_SPORADIC
 #  define _POSIX_SPORADIC_SERVER 1
@@ -306,6 +309,7 @@ extern "C"
 
 pid_t   vfork(void);
 pid_t   getpid(void);
+pid_t   getpgrp(void);
 pid_t   gettid(void);
 pid_t   getppid(void);
 void    _exit(int status) noreturn_function;

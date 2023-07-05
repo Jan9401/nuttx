@@ -29,7 +29,6 @@
 #include <stdbool.h>
 #ifdef CONFIG_ELF_COREDUMP
 #include <arch/elf.h>
-#endif
 
 /****************************************************************************
  * Pre-processor Definitions

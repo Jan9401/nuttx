@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/syslog/syslog_force.c
+ * arch/arm/src/nrf91/nrf91_spu.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,60 +24,20 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdbool.h>
-#include <assert.h>
-
-#include <nuttx/syslog/syslog.h>
-
-#include "syslog.h"
-
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslog_force
- *
- * Description:
- *   This is the low-level system logging interface.  This version forces
- *   the output and is only used in emergency situations (e.g., in assertion
- *   handling).
- *
- * Input Parameters:
- *   ch - The character to add to the SYSLOG (must be positive).
- *
- * Returned Value:
- *   On success, the character is echoed back to the caller. A negated errno
- *   value is returned on any failure.
- *
+ * Name: nrf91_spu_configure
  ****************************************************************************/
 
-int syslog_force(int ch)
-{
-  int i;
+void nrf91_spu_configure(void);
 
-#ifdef CONFIG_SYSLOG_INTBUFFER
-  /* Flush any characters that may have been added to the interrupt
-   * buffer through the emergency channel
-   */
+#ifdef CONFIG_NRF91_SPU_CUSTOM
+/****************************************************************************
+ * Name: board_spu_configure
+ ****************************************************************************/
 
-  syslog_flush_intbuffer(true);
+void board_spu_configure(void);
 #endif
-
-  for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
-    {
-      if (g_syslog_channel[i] == NULL)
-        {
-          break;
-        }
-
-      DEBUGASSERT(g_syslog_channel[i]->sc_ops->sc_force != NULL);
-
-      /* Then send the character to the emergency channel */
-
-      g_syslog_channel[i]->sc_ops->sc_force(g_syslog_channel[i], ch);
-    }
-
-  return ch;
-}
