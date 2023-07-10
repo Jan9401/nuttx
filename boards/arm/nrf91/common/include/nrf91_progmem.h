@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/nrf91/nrf91_modem.h
+ * boards/arm/nrf91/common/include/nrf91_progmem.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,6 +18,9 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_ARM_NRF91_COMMON_INCLUDE_NRF91_PROGMEM_H
+#define __BOARDS_ARM_NRF91_COMMON_INCLUDE_NRF91_PROGMEM_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -25,50 +28,19 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Constant from nrf_modem */
-
-#define NRF91_SHMEM_CTRL_SIZE  (0x4e8)
-
-/* Shared memory configuration */
-
-#define NRF91_SHMEM_START_ADDR (CONFIG_RAM_START)
-#define NRF91_SHMEM_CTRL_BASE  (NRF91_SHMEM_START_ADDR)
-#define NRF91_SHMEM_TX_BASE    (NRF91_SHMEM_CTRL_BASE+NRF91_SHMEM_CTRL_SIZE)
-#define NRF91_SHMEM_TX_SIZE    (CONFIG_NRF91_MODEM_SHMEM_TX_SIZE)
-#define NRF91_SHMEM_RX_BASE    (NRF91_SHMEM_TX_BASE+NRF91_SHMEM_TX_SIZE)
-#define NRF91_SHMEM_RX_SIZE    (CONFIG_NRF91_MODEM_SHMEM_RX_SIZE)
-#define NRF91_SHMEM_TRACE_BASE (NRF91_SHMEM_RX_BASE+NRF91_SHMEM_RX_SIZE)
-#define NRF91_SHMEM_TRACE_SIZE (CONFIG_NRF91_MODEM_SHMEM_TRACE_SIZE)
-
-#if !(NRF91_SHMEM_CTRL_BASE % 4 == 0)
-#  error SHMEM base addres must be word-aligned (4 bytes)
-#endif
-
-#if !(NRF91_SHMEM_TX_BASE % 4 == 0)
-#  error SHMEM base addres must be word-aligned (4 bytes)
-#endif
-
-#if !(NRF91_SHMEM_RX_BASE % 4 == 0)
-#  error SHMEM base addres must be word-aligned (4 bytes)
-#endif
-
-#if !(NRF91_SHMEM_TRACE_BASE % 4 == 0)
-#  error SHMEM base addres must be word-aligned (4 bytes)
-#endif
-
-#ifdef CONFIG_ARCH_FPU
-#  error missing FPU configuration - FPU must be activated in SPE and NSPE
-#endif
-
-/****************************************************************************
  * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nrf91_modem_initialize
+ * Name: nrf91_mtd_initialize
+ *
+ * Description:
+ *   Initialize MTD drivers.
+ *
  ****************************************************************************/
 
-int nrf91_modem_initialize(void);
+#ifdef CONFIG_NRF91_PROGMEM
+int nrf91_progmem_init(void);
+#endif
+
+#endif /* __BOARDS_ARM_NRF91_COMMON_INCLUDE_NRF91_PROGMEM_H */
