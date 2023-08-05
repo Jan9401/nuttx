@@ -30,6 +30,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/atexit.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/list.h>
 
 #include <sys/types.h>
 #include <pthread.h>
@@ -90,9 +91,6 @@ extern "C"
 #  else
      typedef uint8_t tls_ndxset_t;
 #  endif
-
-typedef CODE void (*tls_dtor_t)(FAR void *);
-
 #endif
 
 #if CONFIG_TLS_TASK_NELEM > 0
@@ -108,6 +106,8 @@ typedef CODE void (*tls_dtor_t)(FAR void *);
      typedef uint8_t tls_task_ndxset_t;
 #  endif
 #endif
+
+typedef CODE void (*tls_dtor_t)(FAR void *);
 
 /* This structure encapsulates all variables associated with getopt(). */
 
@@ -125,6 +125,21 @@ struct getopt_s
   FAR char *go_optptr;       /* Current parsing location */
   bool      go_binitialized; /* true:  getopt() has been initialized */
 };
+
+#ifdef CONFIG_PTHREAD_ATFORK
+/* This structure defines the pthread_atfork_s, which is used to manage
+ * the funcs that operates on pthread_atfork() method
+ */
+
+struct pthread_atfork_s
+{
+  CODE void (*prepare)(void);
+  CODE void (*child)(void);
+  CODE void (*parent)(void);
+
+  struct list_node node;
+};
+#endif
 
 struct task_info_s
 {
@@ -149,6 +164,10 @@ struct task_info_s
 #endif
 #ifdef CONFIG_FILE_STREAM
   struct streamlist ta_streamlist; /* Holds C buffered I/O info */
+#endif
+
+#ifdef CONFIG_PTHREAD_ATFORK
+  struct list_node ta_atfork; /* Holds the pthread_atfork_s list */
 #endif
 };
 
@@ -225,7 +244,7 @@ struct tls_info_s
 #if CONFIG_TLS_TASK_NELEM > 0
 
 /****************************************************************************
- * Name: task_tls_allocs
+ * Name: task_tls_alloc
  *
  * Description:
  *   Allocate a global-unique task local storage data index

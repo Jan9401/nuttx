@@ -27,6 +27,10 @@ set(HOSTSRCS)
 set(HOST_INCLUDE_DIRS)
 set(STDLIBS pthread)
 
+if(CONFIG_ARCH_COVERAGE)
+  list(APPEND STDLIBS gcov)
+endif()
+
 list(APPEND HOST_DEFINITIONS -D__SIM__)
 
 # common guest sources
@@ -51,6 +55,7 @@ list(
   sim_sigdeliver.c
   sim_registerdump.c
   sim_saveusercontext.c
+  sim_tcbinfo.c
   sim_textheap.c)
 
 if(CONFIG_HOST_X86_64)
@@ -71,7 +76,7 @@ if(CONFIG_SCHED_BACKTRACE)
   list(APPEND SRCS sim_backtrace.c)
 endif()
 
-if(CONFIG_ARCH_HAVE_FORK AND CONFIG_SCHED_WAITPID)
+if(CONFIG_ARCH_HAVE_FORK)
   list(APPEND SRCS sim_fork.c)
 endif()
 
@@ -106,14 +111,20 @@ else()
   list(APPEND STDLIBS rt)
 endif()
 
+if(CONFIG_LIBM_TOOLCHAIN)
+  list(APPEND STDLIBS m)
+endif()
+
 if(CONFIG_RPTUN)
   list(APPEND SRCS sim_rptun.c)
 endif()
 
 if(CONFIG_SIM_SOUND_ALSA)
-  list(APPEND SRCS sim_alsa.c)
+  list(APPEND SRCS posix/sim_alsa.c)
+  list(APPEND SRCS posix/sim_offload.c)
   list(APPEND STDLIBS asound)
   list(APPEND STDLIBS mad)
+  list(APPEND STDLIBS mp3lame)
 endif()
 
 # host sources ###############################################################
@@ -126,6 +137,12 @@ list(
   sim_hostmisc.c
   sim_hosttime.c
   sim_hostuart.c)
+
+if(CONFIG_SIM_CAMERA_V4L2)
+  list(APPEND HOSTSRCS sim_host_v4l2.c)
+  list(APPEND SRCS sim_camera.c)
+  list(APPEND STDLIBS v4l2)
+endif()
 
 if(CONFIG_SPINLOCK)
   list(APPEND HOSTSRCS sim_testset.c)
@@ -149,6 +166,10 @@ if(CONFIG_SIM_X11FB)
   elseif(CONFIG_SIM_BUTTONS)
     list(APPEND HOSTSRCS sim_x11eventloop.c)
   endif()
+
+  if(CONFIG_SIM_KEYBOARD)
+    list(APPEND SRCS sim_keyboard.c)
+  endif()
 endif()
 
 if(CONFIG_SIM_NETDEV_TAP)
@@ -168,31 +189,37 @@ elseif(CONFIG_SIM_NETDEV_VPNKIT)
   list(APPEND HOSTSRCS sim_vpnkit.c vpnkit/protocol.c vpnkit/negotiate.c)
 endif()
 
-if(CONFIG_SIM_HCISOCKET)
-  list(APPEND HOSTSRCS sim_hcisocket_host.c)
-  list(APPEND SRCS sim_hcisocket.c)
-endif()
-
 if(CONFIG_SIM_NETUSRSOCK)
-  list(APPEND HOSTSRCS sim_usrsock_host.c)
+  list(APPEND HOSTSRCS sim_hostusrsock.c)
   list(APPEND SRCS sim_usrsock.c)
 endif()
 
-if(CONFIG_SIM_BTUART)
-  list(APPEND HOSTSRCS sim_hcisocket_host.c)
-  list(APPEND SRCS sim_btuart.c)
-endif()
-
-if(CONFIG_I2C_RESET)
-  list(APPEND HOST_DEFINITIONS CONFIG_I2C_RESET=1)
+if(CONFIG_SIM_HCISOCKET)
+  list(APPEND HOSTSRCS sim_hosthcisocket.c)
+  list(APPEND SRCS sim_hcisocket.c)
 endif()
 
 if(CONFIG_SIM_I2CBUS_LINUX)
-  list(APPEND HOSTSRCS sim_i2cbuslinux.c)
+  list(APPEND HOSTSRCS sim_linuxi2c.c)
 endif()
 
 if(CONFIG_SIM_SPI_LINUX)
-  list(APPEND HOSTSRCS sim_spilinux.c)
+  list(APPEND HOSTSRCS sim_linuxspi.c)
+endif()
+
+if(CONFIG_SIM_USB_DEV)
+  list(APPEND SRCS sim_usbdev.c)
+  if(CONFIG_SIM_USB_RAW_GADGET)
+    list(APPEND HOSTSRCS sim_rawgadget.c)
+  endif()
+endif()
+
+if(CONFIG_SIM_USB_HOST)
+  list(APPEND SRCS sim_usbhost.c)
+  if(CONFIG_SIM_LIBUSB)
+    list(APPEND HOSTSRCS sim_libusb.c)
+    list(APPEND STDLIBS usb-1.0)
+  endif()
 endif()
 
 if(CONFIG_SIM_HOSTFS)
@@ -207,6 +234,7 @@ endif()
 target_include_directories(nuttx PRIVATE ${CMAKE_BINARY_DIR}/include/nuttx)
 target_include_directories(nuttx PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
+target_include_directories(sim_head PUBLIC ${NUTTX_DIR}/sched)
 target_sources(sim_head PUBLIC sim_head.c sim_doirq.c)
 target_sources(arch PRIVATE ${SRCS})
 

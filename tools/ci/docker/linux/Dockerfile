@@ -230,19 +230,26 @@ RUN mkdir wamrc && \
 FROM ubuntu:20.04
 LABEL maintainer="dev@nuttx.apache.org"
 
+RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq \
+  build-essential \
+  curl \
+  gcc \
+  libssl-dev
+
+RUN mkdir -p cmake && \
+    curl -s -L wget https://cmake.org/files/v3.26/cmake-3.26.0.tar.gz \
+    | tar -C cmake --strip-components=1 -xz && \
+    cd cmake && ./bootstrap && make && make install && rm -rf cmake
+
 RUN dpkg --add-architecture i386
 # This is used for the final images so make sure to not store apt cache
 # Note: xtensa-esp32-elf-gdb is linked to libpython2.7
 RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq --no-install-recommends \
   -o APT::Immediate-Configure=0 \
   avr-libc \
-  build-essential \
   ccache \
   clang \
   clang-tidy \
-  cmake \
-  curl \
-  gcc \
   gcc-avr \
   gcc-multilib \
   genromfs \
@@ -286,6 +293,7 @@ ENV PIP_NO_CACHE_DIR=0
 # instead of requiring them to be compiled.
 RUN pip3 install setuptools
 RUN pip3 install wheel
+RUN pip3 install cmake-format
 # Install CodeChecker and use it to statically analyze the code.
 RUN pip3 install CodeChecker
 # Install cvt2utf to check for non-UTF characters.
@@ -302,6 +310,7 @@ RUN pip3 install pytest==6.2.5
 RUN pip3 install pytest-json==0.4.0
 RUN pip3 install pytest-ordering==0.6
 RUN pip3 install pytest-repeat==0.9.1
+
 # Used to generate symbol table files
 
 RUN mkdir /tools

@@ -72,7 +72,7 @@
  * Private Data
  ****************************************************************************/
 
-static uint8_t g_last_regs[XCPTCONTEXT_SIZE] aligned_data(16);
+static uintptr_t g_last_regs[XCPTCONTEXT_REGS] aligned_data(16);
 
 #ifdef CONFIG_BOARD_COREDUMP
 static struct lib_syslogstream_s  g_syslogstream;
@@ -238,10 +238,11 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
                  intstack_base,
                  intstack_size,
 #ifdef CONFIG_STACK_COLORATION
-                 up_check_intstack());
+                 up_check_intstack()
 #else
-                 0);
+                 0
 #endif
+                 );
 
       tcbstack_sp = up_getusrsp((FAR void *)CURRENT_REGS);
       if (tcbstack_sp < tcbstack_base || tcbstack_sp >= tcbstack_top)
@@ -271,10 +272,11 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
                  tcbstack_base,
                  tcbstack_size,
 #ifdef CONFIG_STACK_COLORATION
-                 up_check_tcbstack(rtcb));
+                 up_check_tcbstack(rtcb)
 #else
-                 0);
+                 0
 #endif
+                 );
     }
 }
 
@@ -551,8 +553,14 @@ void _assert(FAR const char *filename, int linenum,
              FAR const char *msg, FAR void *regs)
 {
   FAR struct tcb_s *rtcb = running_task();
+  struct panic_notifier_s notifier_data;
   struct utsname name;
   bool fatal = true;
+  int flags;
+
+  flags = enter_critical_section();
+
+  sched_lock();
 
   /* try to save current context if regs is null */
 
@@ -562,10 +570,6 @@ void _assert(FAR const char *filename, int linenum,
       regs = g_last_regs;
     }
 
-  /* Flush any buffered SYSLOG data (from prior to the assertion) */
-
-  syslog_flush();
-
 #if CONFIG_BOARD_RESET_ON_ASSERT < 2
   if (!up_interrupt_context() &&
       (rtcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
@@ -574,7 +578,17 @@ void _assert(FAR const char *filename, int linenum,
     }
 #endif
 
-  panic_notifier_call_chain(fatal ? PANIC_KERNEL : PANIC_TASK, rtcb);
+  notifier_data.rtcb = rtcb;
+  notifier_data.regs = regs;
+  notifier_data.filename = filename;
+  notifier_data.linenum = linenum;
+  notifier_data.msg = msg;
+  panic_notifier_call_chain(fatal ? PANIC_KERNEL : PANIC_TASK,
+                            &notifier_data);
+
+  /* Flush any buffered SYSLOG data (from prior to the assertion) */
+
+  syslog_flush();
 
   uname(&name);
   _alert("Current Version: %s %s %s %s %s\n",
@@ -651,27 +665,21 @@ void _assert(FAR const char *filename, int linenum,
       /* Flush any buffered SYSLOG data */
 
       syslog_flush();
-      panic_notifier_call_chain(PANIC_KERNEL_FINAL, rtcb);
+      panic_notifier_call_chain(PANIC_KERNEL_FINAL, &notifier_data);
 
       reboot_notifier_call_chain(SYS_HALT, NULL);
 
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
       board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
 #else
-      /* Disable interrupts on this CPU */
-
-      up_irq_save();
-
-#  ifdef CONFIG_SMP
-      /* Try (again) to stop activity on other CPUs */
-
-      spin_trylock(&g_cpu_irqlock);
-#  endif
-
       for (; ; )
         {
           up_mdelay(250);
         }
 #endif
     }
+
+  sched_unlock();
+
+  leave_critical_section(flags);
 }
