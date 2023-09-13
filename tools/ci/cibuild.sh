@@ -74,11 +74,11 @@ function arm-gcc-toolchain {
         ;;
     esac
     cd "${tools}"
-    wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/12.2.rel1/binrel/arm-gnu-toolchain-12.2.rel1${flavor}-x86_64-arm-none-eabi.tar.xz
-    xz -d arm-gnu-toolchain-12.2.rel1${flavor}-x86_64-arm-none-eabi.tar.xz
-    tar xf arm-gnu-toolchain-12.2.rel1${flavor}-x86_64-arm-none-eabi.tar
-    mv arm-gnu-toolchain-12.2.rel1${flavor}-x86_64-arm-none-eabi gcc-arm-none-eabi
-    rm arm-gnu-toolchain-12.2.rel1${flavor}-x86_64-arm-none-eabi.tar
+    wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/12.3.rel1/binrel/arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-arm-none-eabi.tar.xz
+    xz -d arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-arm-none-eabi.tar.xz
+    tar xf arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-arm-none-eabi.tar
+    mv arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-arm-none-eabi gcc-arm-none-eabi
+    rm arm-gnu-toolchain-12.3.rel1${flavor}-x86_64-arm-none-eabi.tar
   fi
 
   arm-none-eabi-gcc --version
@@ -562,6 +562,14 @@ case ${os} in
     install="arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils bloaty elf-toolchain gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust xtensa-esp32-gcc-toolchain u-boot-tools wasi-sdk c-cache"
     mkdir -p "${tools}"/homebrew
     export HOMEBREW_CACHE=${tools}/homebrew
+    # https://github.com/apache/arrow/issues/15025
+    rm -f /usr/local/bin/2to3* || :
+    rm -f /usr/local/bin/idle3* || :
+    rm -f /usr/local/bin/pydoc3* || :
+    rm -f /usr/local/bin/python3* || :
+    rm -f /usr/local/bin/python3-config || :
+    # same for openssl
+    rm -f /usr/local/bin/openssl || :
     ;;
   Linux)
     install="arm-clang-toolchain arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils bloaty clang-tidy gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust rx-gcc-toolchain sparc-gcc-toolchain xtensa-esp32-gcc-toolchain u-boot-tools wasi-sdk c-cache"

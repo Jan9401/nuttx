@@ -2044,8 +2044,8 @@ static int mmcsd_open(FAR struct inode *inode)
   int ret;
 
   finfo("Entry\n");
-  DEBUGASSERT(inode && inode->i_private);
-  priv = (FAR struct mmcsd_state_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv = inode->i_private;
 
   /* Just increment the reference count on the driver */
 
@@ -2075,8 +2075,8 @@ static int mmcsd_close(FAR struct inode *inode)
   int ret;
 
   finfo("Entry\n");
-  DEBUGASSERT(inode && inode->i_private);
-  priv = (FAR struct mmcsd_state_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv = inode->i_private;
 
   /* Decrement the reference count on the block driver */
 
@@ -2110,8 +2110,8 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
   ssize_t nread;
   ssize_t ret = nsectors;
 
-  DEBUGASSERT(inode && inode->i_private);
-  priv = (FAR struct mmcsd_state_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv = inode->i_private;
   finfo("startsector: %" PRIuOFF " nsectors: %u sectorsize: %d\n",
         startsector, nsectors, priv->blocksize);
 
@@ -2188,8 +2188,8 @@ static ssize_t mmcsd_write(FAR struct inode *inode,
   ssize_t nwrite;
   ssize_t ret = nsectors;
 
-  DEBUGASSERT(inode && inode->i_private);
-  priv = (FAR struct mmcsd_state_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv = inode->i_private;
   finfo("startsector: %" PRIuOFF " nsectors: %u sectorsize: %d\n",
         startsector, nsectors, priv->blocksize);
 
@@ -2260,7 +2260,7 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
   int ret = -EINVAL;
 
   finfo("Entry\n");
-  DEBUGASSERT(inode && inode->i_private);
+  DEBUGASSERT(inode->i_private);
 
   if (geometry)
     {
@@ -2268,7 +2268,7 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
 
       /* Is there a (supported) card inserted in the slot? */
 
-      priv = (FAR struct mmcsd_state_s *)inode->i_private;
+      priv = inode->i_private;
       ret = mmcsd_lock(priv);
       if (ret < 0)
         {
@@ -2322,8 +2322,8 @@ static int mmcsd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
   int ret;
 
   finfo("Entry\n");
-  DEBUGASSERT(inode && inode->i_private);
-  priv = (FAR struct mmcsd_state_s *)inode->i_private;
+  DEBUGASSERT(inode->i_private);
+  priv = inode->i_private;
 
   /* Process the IOCTL by command */
 
@@ -2565,8 +2565,10 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
         }
     }
 #endif /* #ifdef CONFIG_MMCSD_MMCSUPPORT */
-  else
+  else if (!IS_SD(priv->type) && !IS_MMC(priv->type))
     {
+      /* Take this path when no MMC / SD is yet detected */
+
       fwarn("No card inserted.\n");
       SDIO_WIDEBUS(priv->dev, false);
       priv->widebus = false;
@@ -2578,8 +2580,17 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
 
   /* Configure the SDIO peripheral */
 
-  if ((priv->buswidth & MMCSD_SCR_BUSWIDTH_4BIT) != 0)
+  if ((IS_MMC(priv->type) && ((priv->caps & SDIO_CAPS_1BIT_ONLY) == 0)) ||
+      ((priv->buswidth & MMCSD_SCR_BUSWIDTH_4BIT) != 0))
     {
+      /* JEDEC specs: A.8.3 Changing the data bus width: 'Bus testing
+       * procedure' shows how mmc bus width may be detected.  This driver
+       * doesn't do it, so let the low level driver decide how to go with
+       * the widebus selection.  It may well be 1, 4 or 8 bits.
+       *
+       * For SD cards the priv->buswidth is set.
+       */
+
       finfo("Wide bus operation selected\n");
       SDIO_WIDEBUS(priv->dev, true);
       priv->widebus = true;
@@ -2769,15 +2780,14 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
 
   mmcsd_decode_csd(priv, csd);
 
-  if ((priv->caps & SDIO_CAPS_4BIT_ONLY) != 0)
-    {
-      /* Select width (4-bit) bus operation (if the card supports it) */
+  /* It's up to the driver to act on the widebus request.  mmcsd_widebus()
+   * enables the CLOCK_MMC_TRANSFER, so call it here always.
+   */
 
-      ret = mmcsd_widebus(priv);
-      if (ret != OK)
-        {
-          ferr("ERROR: Failed to set wide bus operation: %d\n", ret);
-        }
+  ret = mmcsd_widebus(priv);
+  if (ret != OK)
+    {
+      ferr("ERROR: Failed to set wide bus operation: %d\n", ret);
     }
 
   return OK;

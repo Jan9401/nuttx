@@ -494,7 +494,7 @@ out:
     }
 
   retr = usrsock_rpmsg_send_ack(ept, events, req->head.xid, ret);
-  if (retr >= 0 && events == 0)
+  if (retr >= 0 && (ret > 0 || ret == -EAGAIN) && events == 0)
     {
       usrsock_rpmsg_poll_setup(&priv->pfds[req->usockid],
                                priv->pfds[req->usockid].events | POLLOUT);
@@ -642,7 +642,7 @@ static int usrsock_rpmsg_recvfrom_handler(FAR struct rpmsg_endpoint *ept,
             events, req->head.xid, totlen, iov[i].iov_len);
     }
 
-  if (retr >= 0 && events == 0)
+  if (retr >= 0 && (ret > 0 || ret == -EAGAIN) && events == 0)
     {
       usrsock_rpmsg_poll_setup(&priv->pfds[req->usockid],
                                priv->pfds[req->usockid].events | POLLIN);
@@ -1023,6 +1023,7 @@ static void usrsock_rpmsg_ns_unbind(FAR struct rpmsg_endpoint *ept)
     }
 
   rpmsg_destroy_ept(ept);
+  kmm_free(ept);
 }
 
 static int usrsock_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
@@ -1081,6 +1082,7 @@ static void usrsock_rpmsg_poll_setup(FAR struct pollfd *pfds,
     }
   else
     {
+      pfds->revents = 0;
       pfds->events = 0;
       ret = psock_poll(psock, pfds, false);
     }
@@ -1141,6 +1143,10 @@ static void usrsock_rpmsg_poll_cb(FAR struct pollfd *pfds)
         {
           events |= USRSOCK_EVENT_RECVFROM_AVAIL;
         }
+
+      /* Clear revents */
+
+      pfds->revents &= ~(POLLHUP | POLLERR);
     }
 
   if (oldevents != pfds->events)

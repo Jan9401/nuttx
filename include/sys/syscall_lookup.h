@@ -67,6 +67,10 @@ SYSCALL_LOOKUP(sethostname,                2)
   SYSCALL_LOOKUP(getuid,                   0)
   SYSCALL_LOOKUP(setgid,                   1)
   SYSCALL_LOOKUP(getgid,                   0)
+  SYSCALL_LOOKUP(seteuid,                  1)
+  SYSCALL_LOOKUP(geteuid,                  0)
+  SYSCALL_LOOKUP(setegid,                  1)
+  SYSCALL_LOOKUP(getegid,                  0)
 #endif
 
 /* Semaphores */
@@ -106,10 +110,6 @@ SYSCALL_LOOKUP(task_setcancelstate,        2)
 #ifdef CONFIG_CANCELLATION_POINTS
   SYSCALL_LOOKUP(task_setcanceltype,       2)
   SYSCALL_LOOKUP(task_testcancel,          0)
-#endif
-
-#if CONFIG_TLS_TASK_NELEM > 0
-  SYSCALL_LOOKUP(task_tls_alloc,           1)
 #endif
 
 /* The following can be individually enabled */
@@ -394,13 +394,6 @@ SYSCALL_LOOKUP(nanosleep,                  2)
 SYSCALL_LOOKUP(epoll_create1,              1)
 SYSCALL_LOOKUP(epoll_ctl,                  4)
 SYSCALL_LOOKUP(epoll_wait,                 4)
-
-/* Identity of Group/User */
-
-SYSCALL_LOOKUP(getegid,                    1)
-SYSCALL_LOOKUP(geteuid,                    1)
-SYSCALL_LOOKUP(setegid,                    1)
-SYSCALL_LOOKUP(seteuid,                    1)
 
 /* POSIX timers */
 

@@ -50,7 +50,7 @@
 #include <nuttx/usb/rndis.h>
 #include <nuttx/wqueue.h>
 
-#ifdef CONFIG_RNDIS_BOARD_SERIALSTR
+#ifdef CONFIG_BOARD_USBDEV_SERIALSTR
 #include <nuttx/board.h>
 #endif
 
@@ -1839,7 +1839,7 @@ static int usbclass_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
         break;
 
       case RNDIS_SERIALSTRID:
-#ifdef CONFIG_RNDIS_BOARD_SERIALSTR
+#ifdef CONFIG_BOARD_USBDEV_SERIALSTR
         str = board_usbdev_serialstr();
 #else
         str = CONFIG_RNDIS_SERIALSTR;
@@ -2289,22 +2289,6 @@ static void usbclass_unbind(FAR struct usbdevclass_driver_s *driver,
       usbclass_resetconfig(priv);
       up_mdelay(50);
 
-      /* Free the interrupt IN endpoint */
-
-      if (priv->epintin)
-        {
-          DEV_FREEEP(dev, priv->epintin);
-          priv->epintin = NULL;
-        }
-
-      /* Free the bulk IN endpoint */
-
-      if (priv->epbulkin)
-        {
-          DEV_FREEEP(dev, priv->epbulkin);
-          priv->epbulkin = NULL;
-        }
-
       /* Free the pre-allocated control request */
 
       if (priv->ctrlreq != NULL)
@@ -2328,14 +2312,6 @@ static void usbclass_unbind(FAR struct usbdevclass_driver_s *driver,
         usbdev_freereq(priv->epbulkout, priv->rdreq);
       }
 
-      /* Free the bulk OUT endpoint */
-
-      if (priv->epbulkout)
-        {
-          DEV_FREEEP(dev, priv->epbulkout);
-          priv->epbulkout = NULL;
-        }
-
       netdev_unregister(&priv->netdev);
 
       /* Free write requests that are not in use (which should be all
@@ -2354,6 +2330,30 @@ static void usbclass_unbind(FAR struct usbdevclass_driver_s *driver,
         }
 
       leave_critical_section(flags);
+
+      /* Free the interrupt IN endpoint */
+
+      if (priv->epintin)
+        {
+          DEV_FREEEP(dev, priv->epintin);
+          priv->epintin = NULL;
+        }
+
+      /* Free the bulk IN endpoint */
+
+      if (priv->epbulkin)
+        {
+          DEV_FREEEP(dev, priv->epbulkin);
+          priv->epbulkin = NULL;
+        }
+
+      /* Free the bulk OUT endpoint */
+
+      if (priv->epbulkout)
+        {
+          DEV_FREEEP(dev, priv->epbulkout);
+          priv->epbulkout = NULL;
+        }
     }
 }
 
@@ -2441,7 +2441,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
                  * logic in the composite device implementation.
                  */
 
-#ifndef CONFIG_CDCACM_COMPOSITE
+#ifndef CONFIG_RNDIS_COMPOSITE
 #  ifdef CONFIG_USBDEV_DUALSPEED
                 case USB_DESC_TYPE_OTHERSPEEDCONFIG:
 #  endif /* CONFIG_USBDEV_DUALSPEED */
@@ -2457,7 +2457,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
                   break;
 #endif
 
-#ifndef CONFIG_CDCACM_COMPOSITE
+#ifndef CONFIG_RNDIS_COMPOSITE
                 case USB_DESC_TYPE_STRING:
                   {
                     /* index == language code. */
@@ -2492,7 +2492,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
            * logic in the composite device implementation.
            */
 
-#ifndef CONFIG_CDCACM_COMPOSITE
+#ifndef CONFIG_RNDIS_COMPOSITE
           case USB_REQ_GETCONFIGURATION:
             {
               if (ctrl->type == USB_DIR_IN)
@@ -2644,7 +2644,7 @@ static void usbclass_disconnect(FAR struct usbdevclass_driver_s *driver,
    * re-enumerated (unless we are part of a composite device)
    */
 
-#ifndef CONFIG_CDCACM_COMPOSITE
+#ifndef CONFIG_RNDIS_COMPOSITE
   DEV_CONNECT(dev);
 #endif
 }
@@ -2882,7 +2882,7 @@ static void usbclass_uninitialize(FAR struct usbdevclass_driver_s *classdev)
   FAR struct rndis_alloc_s *alloc = (FAR struct rndis_alloc_s *)drvr->dev;
   if (!alloc->dev.registered)
     {
-#ifdef CONFIG_USBADB_COMPOSITE
+#ifdef CONFIG_RNDIS_COMPOSITE
       kmm_free(alloc);
 #endif
       return;

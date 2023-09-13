@@ -171,7 +171,7 @@ static int pipe_register(size_t bufsize, int flags,
 
   /* Register the pipe device */
 
-  ret = register_driver(devname, &g_pipe_fops, 0666, (FAR void *)dev);
+  ret = register_pipedriver(devname, &g_pipe_fops, 0666, (FAR void *)dev);
   if (ret != 0)
     {
       pipecommon_freedev(dev);
@@ -251,14 +251,14 @@ int file_pipe(FAR struct file *filep[2], size_t bufsize, int flags)
 
   /* Remove the pipe name from file system */
 
-  unregister_driver(devname);
+  unregister_pipedriver(devname);
   return OK;
 
 errout_with_wrfd:
   file_close(filep[1]);
 
 errout_with_driver:
-  unregister_driver(devname);
+  unregister_pipedriver(devname);
   return ret;
 }
 
@@ -285,7 +285,6 @@ int pipe2(int fd[2], int flags)
 {
   char devname[32];
   int ret;
-  bool blocking;
 
   /* Register a new pipe device */
 
@@ -295,10 +294,6 @@ int pipe2(int fd[2], int flags)
       set_errno(-ret);
       return ERROR;
     }
-
-  /* Check for the O_NONBLOCK bit on flags */
-
-  blocking = (flags & O_NONBLOCK) == 0;
 
   /* Get a write file descriptor setting O_NONBLOCK temporarily */
 
@@ -310,7 +305,7 @@ int pipe2(int fd[2], int flags)
 
   /* Clear O_NONBLOCK if it was set previously */
 
-  if (blocking)
+  if ((flags & O_NONBLOCK) == 0)
     {
       ret = fcntl(fd[1], F_SETFL, flags & (~O_NONBLOCK));
       if (ret < 0)
@@ -329,14 +324,14 @@ int pipe2(int fd[2], int flags)
 
   /* Remove the pipe name from file system */
 
-  unregister_driver(devname);
+  unregister_pipedriver(devname);
   return OK;
 
 errout_with_wrfd:
   nx_close(fd[1]);
 
 errout_with_driver:
-  unregister_driver(devname);
+  unregister_pipedriver(devname);
   return ERROR;
 }
 

@@ -89,7 +89,7 @@ static int lcddev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct lcddev_dev_s *priv;
   int ret = OK;
 
-  priv = (FAR struct lcddev_dev_s *)filep->f_inode->i_private;
+  priv = filep->f_inode->i_private;
 
   switch (cmd)
     {
@@ -292,7 +292,17 @@ static int lcddev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       }
       break;
     default:
-      ret = -EINVAL;
+      {
+        if (priv->lcd_ptr->ioctl)
+          {
+            ret = priv->lcd_ptr->ioctl(priv->lcd_ptr, cmd, arg);
+          }
+        else
+          {
+            gerr("ERROR: Unsupported IOCTL command: %d\n", cmd);
+            ret = -ENOTTY;
+          }
+      }
       break;
     }
 
@@ -326,7 +336,7 @@ int lcddev_register(int devno)
 
   /* Allocate a new lcd_dev driver instance */
 
-  priv = (FAR struct lcddev_dev_s *)kmm_zalloc(sizeof(struct lcddev_dev_s));
+  priv = kmm_zalloc(sizeof(struct lcddev_dev_s));
 
   if (!priv)
     {
