@@ -198,14 +198,17 @@ static int sim_rptun_stop(struct rptun_dev_s *dev)
   struct sim_rptun_dev_s *priv = container_of(dev,
                               struct sim_rptun_dev_s, rptun);
 
-  if (priv->master & SIM_RPTUN_BOOT)
+  if ((priv->master & SIM_RPTUN_BOOT) && (priv->pid > 0))
     {
       priv->shmem->cmdm = SIM_RPTUN_STOP << SIM_RPTUN_SHIFT;
-
       host_waitpid(priv->pid);
+    }
 
+  if (priv->shmem)
+    {
       host_freeshmem(priv->shmem);
       priv->shmem = NULL;
+      host_unlinkshmem(priv->shmemname);
     }
 
   return 0;

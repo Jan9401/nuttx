@@ -30,7 +30,9 @@
 #include <nuttx/irq.h>
 #include <nuttx/tls.h>
 #include <nuttx/signal.h>
-
+#ifdef CONFIG_ARCH_LEDS
+#  include <arch/board/board.h>
+#endif
 #include <nuttx/panic_notifier.h>
 #include <nuttx/reboot_notifier.h>
 #include <nuttx/syslog/syslog.h>
@@ -585,6 +587,9 @@ void _assert(FAR const char *filename, int linenum,
   notifier_data.msg = msg;
   panic_notifier_call_chain(fatal ? PANIC_KERNEL : PANIC_TASK,
                             &notifier_data);
+#ifdef CONFIG_ARCH_LEDS
+  board_autoled_on(LED_ASSERTION);
+#endif
 
   /* Flush any buffered SYSLOG data (from prior to the assertion) */
 
@@ -674,6 +679,13 @@ void _assert(FAR const char *filename, int linenum,
 #else
       for (; ; )
         {
+#ifdef CONFIG_ARCH_LEDS
+          /* FLASH LEDs a 2Hz */
+
+          board_autoled_on(LED_PANIC);
+          up_mdelay(250);
+          board_autoled_off(LED_PANIC);
+#endif
           up_mdelay(250);
         }
 #endif

@@ -650,6 +650,24 @@
 #  define rcinfo      _none
 #endif
 
+#ifdef CONFIG_DEBUG_REGMAP_ERROR
+#  define regmaperr       _err
+#else
+#  define regmaperr      _none
+#endif
+
+#ifdef CONFIG_DEBUG_REGMAP_WARN
+#  define regmapwarn     _warn
+#else
+#  define regmapwarn     _none
+#endif
+
+#ifdef CONFIG_DEBUG_REGMAP_INFO
+#  define regmapinfo     _info
+#else
+#  define regmapinfo     _none
+#endif
+
 #ifdef CONFIG_DEBUG_RMT_ERROR
 #  define rmterr        _err
 #else
@@ -864,6 +882,24 @@
 #  define rstinfo     _info
 #else
 #  define rstinfo     _none
+#endif
+
+#ifdef CONFIG_DEBUG_IPC_ERROR
+#  define ipcerr       _err
+#else
+#  define ipcerr      _none
+#endif
+
+#ifdef CONFIG_DEBUG_IPC_WARN
+#  define ipcwarn     _warn
+#else
+#  define ipcwarn     _none
+#endif
+
+#ifdef CONFIG_DEBUG_IPC_INFO
+#  define ipcinfo     _info
+#else
+#  define ipcinfo     _none
 #endif
 
 /* Buffer dumping macros do not depend on varargs */

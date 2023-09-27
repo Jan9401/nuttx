@@ -56,6 +56,15 @@ config SENSORS_FAKESENSOR
 		2.1234,3.23443,2.23456
 		...
 
+config SENSORS_GOLDFISH_GPS
+	bool "Goldfish GPS Support"
+	depends on SENSORS_GPS
+	default n
+
+config SENSORS_GOLDFISH_SENSOR
+	bool "Goldfish SENSORS Support"
+	default n
+
 config SENSORS_APDS9960
 	bool "Avago APDS-9960 Gesture Sensor support"
 	default n
@@ -90,7 +99,7 @@ config APDS9922_ALS_NPOLLWAITERS
 config APDS9922_PS_NPOLLWAITERS
 	int "APDS-9922 - number of PS poll waiters"
 	default 2
-	depends on SENSORS_APDS9922  
+	depends on SENSORS_APDS9922
 	---help---
 		Sets the number of poll waiters for the proximity sensor
 
@@ -164,7 +173,6 @@ if SENSORS_BMI160
 config SENSORS_BMI160_UORB
 	bool "BMI160 UORB Interface"
 	default n
-	select UORB
 	---help---
 	Enables Work with the UORB or Character Device interface.
 	If not set, the Character Device is used by default.
@@ -253,7 +261,6 @@ if SENSORS_BMP180
 
 config SENSORS_BMP180_UORB
 	bool "BMP180 UORB Interface"
-	select UORB
 	---help---
 		Enables work with the UORB or Character Device interface.
 		If not set, the Character Device is used by default.
