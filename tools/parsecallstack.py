@@ -119,4 +119,4 @@ if __name__ == "__main__":
     args = parse_args()
     regs = get_regs(args.filename)
     stackvalue = get_stackvalue(args.filename)
-    generate_cmm(args.cpu, regs, stackvalue)
+    generate_cmm(args.cputype, regs, stackvalue)
