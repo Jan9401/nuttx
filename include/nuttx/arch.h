@@ -761,15 +761,27 @@ void up_textheap_free(FAR void *p);
 #endif
 
 /****************************************************************************
- * Name: up_textheap_heapmember
+ * Name: up_dataheap_memalign
  *
  * Description:
- *   Test if memory is from text heap.
+ *   Allocate memory for data sections with the specified alignment.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
-bool up_textheap_heapmember(FAR void *p);
+#if defined(CONFIG_ARCH_USE_DATA_HEAP)
+FAR void *up_dataheap_memalign(size_t align, size_t size);
+#endif
+
+/****************************************************************************
+ * Name: up_dataheap_free
+ *
+ * Description:
+ *   Free memory allocated for data sections.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_USE_DATA_HEAP)
+void up_dataheap_free(FAR void *p);
 #endif
 
 /****************************************************************************
@@ -1367,7 +1379,7 @@ int up_addrenv_kmap_pages(FAR void **pages, unsigned int npages,
 #endif
 
 /****************************************************************************
- * Name: riscv_unmap_pages
+ * Name: up_addrenv_kunmap_pages
  *
  * Description:
  *   Unmap a previously mapped virtual memory region.
@@ -1579,6 +1591,18 @@ int up_prioritize_irq(int irq, int priority);
 void up_secure_irq(int irq, bool secure);
 #else
 # define up_secure_irq(i, s)
+#endif
+
+#ifdef CONFIG_SMP_CALL
+/****************************************************************************
+ * Name: up_send_smp_call
+ *
+ * Description:
+ *   Send smp call to target cpu
+ *
+ ****************************************************************************/
+
+void up_send_smp_call(cpu_set_t cpuset);
 #endif
 
 /****************************************************************************

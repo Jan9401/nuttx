@@ -28,6 +28,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <sched.h>
 #include <signal.h>
@@ -631,13 +632,13 @@ struct tcb_s
   /* Pre-emption monitor support ********************************************/
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-  unsigned long premp_start;             /* Time when preemption disabled   */
-  unsigned long premp_max;               /* Max time preemption disabled    */
-  unsigned long crit_start;              /* Time critical section entered   */
-  unsigned long crit_max;                /* Max time in critical section    */
-  unsigned long run_start;               /* Time when thread begin run      */
-  unsigned long run_max;                 /* Max time thread run             */
-  unsigned long run_time;                /* Total time thread run           */
+  clock_t premp_start;             /* Time when preemption disabled   */
+  clock_t premp_max;               /* Max time preemption disabled    */
+  clock_t crit_start;              /* Time critical section entered   */
+  clock_t crit_max;                /* Max time in critical section    */
+  clock_t run_start;               /* Time when thread begin run      */
+  clock_t run_max;                 /* Max time thread run             */
+  clock_t run_time;                /* Total time thread run           */
 #endif
 
   /* State save areas *******************************************************/
@@ -743,6 +744,12 @@ begin_packed_struct struct tcbinfo_s
 
 typedef CODE void (*nxsched_foreach_t)(FAR struct tcb_s *tcb, FAR void *arg);
 
+/* This is the callback type used by nxsched_smp_call() */
+
+#ifdef CONFIG_SMP_CALL
+typedef CODE int (*nxsched_smp_call_t)(FAR void *arg);
+#endif
+
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************
@@ -762,8 +769,8 @@ extern "C"
 #ifdef CONFIG_SCHED_CRITMONITOR
 /* Maximum time with pre-emption disabled or within critical section. */
 
-EXTERN unsigned long g_premp_max[CONFIG_SMP_NCPUS];
-EXTERN unsigned long g_crit_max[CONFIG_SMP_NCPUS];
+EXTERN clock_t g_premp_max[CONFIG_SMP_NCPUS];
+EXTERN clock_t g_crit_max[CONFIG_SMP_NCPUS];
 #endif /* CONFIG_SCHED_CRITMONITOR */
 
 EXTERN const struct tcbinfo_s g_tcbinfo;
@@ -1565,6 +1572,67 @@ pid_t nxsched_getppid(void);
  ****************************************************************************/
 
 size_t nxsched_collect_deadlock(FAR pid_t *pid, size_t count);
+
+#ifdef CONFIG_SMP_CALL
+/****************************************************************************
+ * Name: nxsched_smp_call_handler
+ *
+ * Description:
+ *   SMP function call handler
+ *
+ * Input Parameters:
+ *   irq     - Interrupt id
+ *   context - Regs context before irq
+ *   arg     - Interrupt arg
+ *
+ * Returned Value:
+ *   Result
+ *
+ ****************************************************************************/
+
+int nxsched_smp_call_handler(int irq, FAR void *context,
+                             FAR void *arg);
+
+/****************************************************************************
+ * Name: nxsched_smp_call_single
+ *
+ * Description:
+ *   Call function on single processor
+ *
+ * Input Parameters:
+ *   cpuid - Target cpu id
+ *   func  - Function
+ *   arg   - Function args
+ *   wait  - Wait function callback or not
+ *
+ * Returned Value:
+ *   Result
+ *
+ ****************************************************************************/
+
+int nxsched_smp_call_single(int cpuid, nxsched_smp_call_t func,
+                            FAR void *arg, bool wait);
+
+/****************************************************************************
+ * Name: nxsched_smp_call
+ *
+ * Description:
+ *   Call function on multi processors
+ *
+ * Input Parameters:
+ *   cpuset - Target cpuset
+ *   func   - Function
+ *   arg    - Function args
+ *   wait   - Wait function callback or not
+ *
+ * Returned Value:
+ *   Result
+ *
+ ****************************************************************************/
+
+int nxsched_smp_call(cpu_set_t cpuset, nxsched_smp_call_t func,
+                     FAR void *arg, bool wait);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
