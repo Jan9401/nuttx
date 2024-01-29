@@ -27,8 +27,24 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
 endif
 
+ifeq ($(CONFIG_USERLED),y)
+CSRCS += stm32_userleds.c
+endif
+
 ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += stm32_appinit.c
+endif
+
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS +=  stm32_buttons.c
+endif
+
+ifeq ($(CONFIG_STM32_SDIO),y)
+CSRCS += stm32_sdio.c
+endif
+
+ifeq ($(CONFIG_I2C_EE_24XX),y)
+CSRCS += stm32_at24.c
 endif
 
 DEPPATH += --dep-path board

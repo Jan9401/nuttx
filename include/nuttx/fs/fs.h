@@ -37,7 +37,9 @@
 
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/mm/map.h>
+#include <nuttx/spawn.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -317,7 +319,8 @@ struct mountpt_operations
   CODE int     (*mmap)(FAR struct file *filep,
                        FAR struct mm_map_entry_s *map);
   CODE int     (*truncate)(FAR struct file *filep, off_t length);
-
+  CODE int     (*poll)(FAR struct file *filep, FAR struct pollfd *fds,
+                       bool setup);
   /* The two structures need not be common after this point. The following
    * are extended methods needed to deal with the unique needs of mounted
    * file systems.
@@ -478,7 +481,7 @@ struct file
 
 struct filelist
 {
-  mutex_t           fl_lock;    /* Manage access to the file list */
+  spinlock_t        fl_lock;    /* Manage access to the file list */
   uint8_t           fl_rows;    /* The number of rows of fl_files array */
   FAR struct file **fl_files;   /* The pointer of two layer file descriptors array */
 };
@@ -852,6 +855,19 @@ void files_initlist(FAR struct filelist *list);
 void files_releaselist(FAR struct filelist *list);
 
 /****************************************************************************
+ * Name: files_countlist
+ *
+ * Description:
+ *   Get file count from file list
+ *
+ * Returned Value:
+ *   file count of file list
+ *
+ ****************************************************************************/
+
+int files_countlist(FAR struct filelist *list);
+
+/****************************************************************************
  * Name: files_duplist
  *
  * Description:
@@ -863,17 +879,26 @@ void files_releaselist(FAR struct filelist *list);
  *
  ****************************************************************************/
 
-int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist);
+int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist,
+                  FAR const posix_spawn_file_actions_t *actions,
+                  bool cloexec);
 
 /****************************************************************************
- * Name: files_close_onexec
+ * Name: files_fget
  *
  * Description:
- *   Close specified task's file descriptors with O_CLOEXEC before exec.
+ *   Get the instance of struct file from file list by file descriptor.
+ *
+ * Input Parameters:
+ *   list - The list of files for a task.
+ *   fd   - A valid descriptor between 0 and files_countlist(list).
+ *
+ * Returned Value:
+ *   Pointer to file structure of list[fd].
  *
  ****************************************************************************/
 
-void files_close_onexec(FAR struct tcb_s *tcb);
+FAR struct file *files_fget(FAR struct filelist *list, int fd);
 
 /****************************************************************************
  * Name: file_allocate_from_tcb
@@ -1193,6 +1218,31 @@ int open_blockdriver(FAR const char *pathname, int mountflags,
 int close_blockdriver(FAR struct inode *inode);
 
 /****************************************************************************
+ * Name: find_blockdriver
+ *
+ * Description:
+ *   Return the inode of the block driver specified by 'pathname'
+ *
+ * Input Parameters:
+ *   pathname   - The full path to the block driver to be located
+ *   mountflags - If MS_RDONLY is not set, then driver must support write
+ *                operations (see include/sys/mount.h)
+ *   ppinode    - Address of the location to return the inode reference
+ *
+ * Returned Value:
+ *   Returns zero on success or a negated errno on failure:
+ *
+ *   ENOENT  - No block driver of this name is registered
+ *   ENOTBLK - The inode associated with the pathname is not a block driver
+ *   EACCESS - The MS_RDONLY option was not set but this driver does not
+ *             support write access
+ *
+ ****************************************************************************/
+
+int find_blockdriver(FAR const char *pathname, int mountflags,
+                     FAR struct inode **ppinode);
+
+/****************************************************************************
  * Name: find_mtddriver
  *
  * Description:
@@ -1229,19 +1279,6 @@ int find_mtddriver(FAR const char *pathname, FAR struct inode **ppinode);
  ****************************************************************************/
 
 int close_mtddriver(FAR struct inode *pinode);
-
-/****************************************************************************
- * Name: lib_flushall
- *
- * Description:
- *   Called either (1) by the OS when a task exits, or (2) from fflush()
- *   when a NULL stream argument is provided.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_FILE_STREAM
-int lib_flushall(FAR struct streamlist *list);
-#endif
 
 /****************************************************************************
  * Name: file_read

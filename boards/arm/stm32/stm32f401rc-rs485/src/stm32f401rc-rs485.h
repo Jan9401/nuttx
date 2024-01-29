@@ -36,57 +36,61 @@
 
 /* Configuration ************************************************************/
 
-#define HAVE_MMCSD 1
+#define HAVE_SDIO  1
 #if !defined(CONFIG_STM32_SDIO) || !defined(CONFIG_MMCSD) || \
     !defined(CONFIG_MMCSD_SDIO)
-#  undef HAVE_MMCSD
+#  undef HAVE_SDIO
 #endif
 
-/* LED.  User LD2: the green LED is a user LED connected to Arduino signal
- * D13 corresponding to MCU I/O PA5 (pin 21) or PB13 (pin 34) depending on
- * the STM32 target.
+#define SDIO_MINOR  0  /* Any minor number, default 0 */
+#define SDIO_SLOTNO 0  /* Only one slot */
+
+#define GPIO_SDIO_NCD    (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|\
+                          GPIO_PORTA|GPIO_PIN8)
+
+/* The STM32F401RC-RS485 has 4 blue LEDs connected as below:
+ * - LED_1 is connected to the GPIO PC0.
+ * - LED_2 is connected to the GPIO PC1.
+ * - LED_3 is connected to the GPIO PC2.
+ * - LED_4 is connected to the GPIO PC3.
  *
  * - When the I/O is HIGH value, the LED is on.
  * - When the I/O is LOW, the LED is off.
  */
 
 #define GPIO_LED1 \
-  (GPIO_PORTC | GPIO_PIN0 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | \
+  (GPIO_PORTC | GPIO_PIN0 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | \
+   GPIO_SPEED_50MHz)
+
+#define GPIO_LED2 \
+  (GPIO_PORTC | GPIO_PIN1 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | \
+   GPIO_SPEED_50MHz)
+
+#define GPIO_LED3 \
+  (GPIO_PORTC | GPIO_PIN2 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | \
+   GPIO_SPEED_50MHz)
+
+#define GPIO_LED4 \
+  (GPIO_PORTC | GPIO_PIN3 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | \
    GPIO_SPEED_50MHz)
 
 /* Buttons
- *
- * B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32
- * microcontroller.
+ * The STM32F401RC-RS485 has 3 user buttons.
+ * - SW3 is connected to the GPIO PB13.
+ * - SW4 is connected to the GPIO PB14.
+ * - SW5 is connected to the GPIO PB15.
  */
 
-#define MIN_IRQBUTTON   BUTTON_USER
-#define MAX_IRQBUTTON   BUTTON_USER
-#define NUM_IRQBUTTONS  1
+#define MIN_IRQBUTTON   BUTTON_SW3
+#define MAX_IRQBUTTON   BUTTON_SW5
+#define NUM_IRQBUTTONS  3
 
-#define GPIO_BTN_USER \
-  (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTC | GPIO_PIN13)
-
-/* The shield uses the following pins:
- *
- *   +5V
- *   GND
- *  SERIAL_TX=PA_2    USER_BUTTON=PC_13
- *  SERIAL_RX=PA_3            LD2=PA_5
- *
- * Analog                         Digital
- *  A0=PA_0    USART2RX D0=PA_3              D8 =PA_9
- *  A1=PA_1    USART2TX D1=PA_2              D9 =PC_7
- *  A2=PA_4             D2=PA_10     WIFI_CS=D10=PB_6 SPI_CS
- *  A3=PB_0    WIFI_INT=D3=PB_3              D11=PA_7 SPI_MOSI
- *  A4=PC_1       SD_CS=D4=PB_5              D12=PA_6 SPI_MISO
- *  A5=PC_0     WIFI_EN=D5=PB_4          LD2=D13=PA_5 SPI_SCK
- *                 LED2=D6=PB_10    I2C1_SDA=D14=PB_9 WIFI Probe
- *                      D7=PA_8     I2C1_SCL=D15=PB_8 WIFI Probe
- *
- *  mostly from: https://mbed.org/platforms/ST-Nucleo-F401RE/
- *
- */
+#define GPIO_BTN_SW3 \
+  (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTB | GPIO_PIN13)
+#define GPIO_BTN_SW4 \
+  (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTB | GPIO_PIN14)
+#define GPIO_BTN_SW5 \
+  (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTB | GPIO_PIN15)
 
 /* SPI1 off */
 
@@ -305,5 +309,37 @@ int board_ajoy_initialize(void);
 #ifdef CONFIG_CAN_MCP2515
 int stm32_mcp2515initialize(const char *devpath);
 #endif
+
+/****************************************************************************
+ * Name: stm32_sdio_initialize
+ *
+ * Description:
+ *   Initialize SDIO-based MMC/SD card support
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_STM32_SDIO)
+int stm32_sdio_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_i2cbus_initialize
+ *
+ * Description:
+ *   Initialize one I2C bus
+ *
+ ****************************************************************************/
+
+struct i2c_master_s *stm32_i2cbus_initialize(int port);
+
+/****************************************************************************
+ * Name: stm32_at24_init
+ *
+ * Description:
+ *   Initialize and register the EEPROM for 24XX  driver.
+ *
+ ****************************************************************************/
+
+int stm32_at24_init(char *path);
 
 #endif /* __BOARDS_ARM_STM32_STM32F401RC_RS485_SRC_STM32F401RC_RS485_H */

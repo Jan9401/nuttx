@@ -64,6 +64,10 @@
 #  include "esp32_board_wlan.h"
 #endif
 
+#ifdef CONFIG_ESP32_PCNT_AS_QE
+#  include "board_qencoder.h"
+#endif
+
 #ifdef CONFIG_ESP32_RT_TIMER
 #  include "esp32_rt_timer.h"
 #endif
@@ -71,6 +75,7 @@
 #ifdef CONFIG_LCD_DEV
 #  include <nuttx/board.h>
 #  include <nuttx/lcd/lcd_dev.h>
+#  include "esp32_backlight.h"
 #endif
 
 #include "esp32-2432S028.h"
@@ -299,17 +304,6 @@ int esp32_bringup(void)
 
 #endif
 
-#ifdef CONFIG_SENSORS_BMP180
-  /* Try to register BMP180 device in I2C0 */
-
-  ret = board_bmp180_initialize(0, 0);
-
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize BMP180 driver: %d\n", ret);
-    }
-#endif
-
 #ifdef CONFIG_INPUT_BUTTONS
   /* Register the BUTTON driver */
 
@@ -335,10 +329,29 @@ int esp32_bringup(void)
       syslog(LOG_ERR, "ERROR: board_lcd_initialize() failed: %d\n", ret);
     }
 
+  ret = esp32_set_backlight(DISPLAY_BCKL_LEVEL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp32_set_backlight() failed: %d\n", ret);
+    }
+
   ret = lcddev_register(0);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: lcddev_register() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_QENCODER
+  /* Initialize and register the qencoder driver */
+
+  ret = board_qencoder_initialize(0, PCNT_QE0_ID);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the qencoder: %d\n",
+             ret);
+      return ret;
     }
 #endif
 

@@ -423,7 +423,7 @@ config ARCH_BOARD_FRANZININHO_WIFI
 
 config ARCH_BOARD_ESP32S3_DEVKIT
 	bool "Espressif ESP32-S3 DevKit"
-	depends on ARCH_CHIP_ESP32S3WROOM1 || ARCH_CHIP_ESP32S3MINI1
+	depends on ARCH_CHIP_ESP32S3WROOM1 || ARCH_CHIP_ESP32S3MINI1 || ARCH_CHIP_ESP32S3WROOM2
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
@@ -728,6 +728,16 @@ config ARCH_BOARD_IMXRT1064_EVK
 	---help---
 		This is the board configuration for the port of NuttX to the NXP i.MXRT
 		evaluation kit, MIMXRT1064-EVK.  This board features the MIMXRT1064DVL6A MCU.
+
+config ARCH_BOARD_IMXRT1170_EVK
+	bool "NXP i.MX RT 1170 EVK"
+	depends on ARCH_CHIP_MIMXRT1176DVMAA
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This is the board configuration for the port of NuttX to the NXP i.MXRT
+		evaluation kit, MIMXRT1170-EVK.  This board features the MIMXRT1176DVMAA MCU.
 
 config ARCH_BOARD_LC823450_XGEVK
 	bool "ON Semiconductor LC823450-XGEVK development board"
@@ -1270,6 +1280,14 @@ config ARCH_BOARD_OLIMEX_STRP711
 		further information.  STATUS: Configurations for the basic OS test and NSH
 		are complete and verified.
 
+config ARCH_BOARD_ODRIVE36
+	bool "Odrive V3.6 board"
+	depends on ARCH_CHIP_STM32F405RG
+	---help---
+		This port uses the ODrive3.6 board. This is an open-source dual-motor
+		FOC controller based on the STMicro STM32F405RG and TI DRV8301 gate drivers.
+		See https://odriverobotics.com/shop/odrive-v36 for further information.
+
 config ARCH_BOARD_OLIMEX_STM32H405
 	bool "Olimex STM32 H405 board"
 	depends on ARCH_CHIP_STM32F405RG
@@ -1714,6 +1732,14 @@ config ARCH_BOARD_STM32H745I_DISCO
 		STMicro STM32H745I-DISCO board based on the STMicro
 		STM32H745XI MCU.
 
+config ARCH_BOARD_LINUM_STM32H753BI
+	bool "Linum (STM32H753BI) board"
+	depends on ARCH_CHIP_STM32H753BI
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		The Linum board is based on the STMicro STM32H753BI MCU.
+
 config ARCH_BOARD_NUCLEO_L152RE
 	bool "STM32L152 Nucleo L152RE"
 	depends on ARCH_CHIP_STM32L152RE
@@ -1834,6 +1860,13 @@ config ARCH_BOARD_ADAFRUIT_FEATHER_RP2040
 		This is a port to the Adafruit Feather RP2040 board.
 		Support is derived from Raspberry Pi Pico support.
 
+config ARCH_BOARD_SEEED_XIAO_RP2040
+	bool "Seeed Studio XIAO RP2040 board"
+	depends on ARCH_CHIP_RP2040
+	---help---
+		This is a port to the Seeed Studio XIAO RP2040 board.
+		Support is derived from Raspberry Pi Pico support.
+
 config ARCH_BOARD_ADAFRUIT_KB2040
 	bool "Adafruit KB2040 board"
 	depends on ARCH_CHIP_RP2040
@@ -1913,6 +1946,19 @@ config ARCH_BOARD_JH7110_STAR64
 	---help---
 		This options selects support for NuttX on PINE64 Star64 based
 		on StarFive JH7110 SoC.
+
+config ARCH_BOARD_K230_CANMV
+	bool "CanMV K230"
+	depends on ARCH_CHIP_K230
+	---help---
+		This selects NuttX on CanMV-K230 board with Kendryte K230 SoC.
+
+config ARCH_BOARD_BL808_OX64
+	bool "PINE64 Ox64"
+	depends on ARCH_CHIP_BL808
+	---help---
+		This options selects support for NuttX on PINE64 Ox64 based
+		on Bouffalo Lab BL808 SoC.
 
 config ARCH_BOARD_S32K118EVB
 	bool "NXP S32K118EVB"
@@ -2831,6 +2877,15 @@ config ARCH_BOARD_XMC4700RELAX
 	---help---
 		Infineon XMC4700 Relax
 
+config ARCH_BOARD_XMC4800RELAX
+	bool "Infineon XMC4800 Relax"
+	depends on ARCH_CHIP_XMC4800
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Infineon XMC4800 Relax
+
 config ARCH_BOARD_VERDIN_MX8MP
 	bool "Toradex Verdin i.MX8MP"
 	depends on ARCH_CHIP_MX8MP
@@ -3065,7 +3120,7 @@ config ARCH_BOARD
 	default "esp32-pico-kit"            if ARCH_BOARD_ESP32_PICO_KIT
 	default "esp32-sparrow-kit"         if ARCH_BOARD_ESP32_SPARROWKIT
 	default "esp32-wrover-kit"          if ARCH_BOARD_ESP32_WROVERKIT
-	default "esp32-2432S028"												if ARCH_BOARD_ESP32_2432S028
+	default "esp32-2432S028"            if ARCH_BOARD_ESP32_2432S028
 	default "esp32c3-devkit"            if ARCH_BOARD_ESP32C3_DEVKIT
 	default "esp32c3-devkit-rust-1"     if ARCH_BOARD_ESP32C3_DEVKIT_RUST1
 	default "esp32c3-generic"           if ARCH_BOARD_ESP32C3_GENERIC
@@ -3102,6 +3157,7 @@ config ARCH_BOARD
 	default "imxrt1050-evk"             if ARCH_BOARD_IMXRT1050_EVK
 	default "imxrt1060-evk"             if ARCH_BOARD_IMXRT1060_EVK
 	default "imxrt1064-evk"             if ARCH_BOARD_IMXRT1064_EVK
+	default "imxrt1170-evk"             if ARCH_BOARD_IMXRT1170_EVK
 	default "kwikstik-k40"              if ARCH_BOARD_KWIKSTIK_K40
 	default "launchxl-cc1310"           if ARCH_BOARD_LAUNCHXL_CC1310
 	default "launchxl-cc1312r1"         if ARCH_BOARD_LAUNCHXL_CC1312R1
@@ -3175,6 +3231,7 @@ config ARCH_BOARD
 	default "nucleo-h743zi2"            if ARCH_BOARD_NUCLEO_H743ZI2
 	default "nucleo-h745zi"             if ARCH_BOARD_NUCLEO_H745ZI
 	default "stm32h745i-disco"          if ARCH_BOARD_STM32H745I_DISCO
+	default "linum-stm32h753bi"         if ARCH_BOARD_LINUM_STM32H753BI
 	default "nucleo-l073rz"             if ARCH_BOARD_NUCLEO_L073RZ
 	default "nucleo-l152re"             if ARCH_BOARD_NUCLEO_L152RE
 	default "nucleo-l432kc"             if ARCH_BOARD_NUCLEO_L432KC
@@ -3198,6 +3255,7 @@ config ARCH_BOARD
 	default "olimex-stm32-p207"         if ARCH_BOARD_OLIMEX_STM32P207
 	default "olimex-stm32-p407"         if ARCH_BOARD_OLIMEX_STM32P407
 	default "olimex-strp711"            if ARCH_BOARD_OLIMEX_STRP711
+	default "odrive36"                  if ARCH_BOARD_ODRIVE36
 	default "olimexino-stm32"           if ARCH_BOARD_OLIMEXINO_STM32
 	default "omnibusf4"                 if ARCH_BOARD_OMNIBUSF4
 	default "open1788"                  if ARCH_BOARD_OPEN1788
@@ -3214,6 +3272,7 @@ config ARCH_BOARD
 	default "raspberrypi-pico-w"        if ARCH_BOARD_RASPBERRYPI_PICO_W
 	default "pimoroni-tiny2040"         if ARCH_BOARD_PIMORONI_TINY2040
 	default "adafruit-feather-rp2040"   if ARCH_BOARD_ADAFRUIT_FEATHER_RP2040
+	default "seeed-xiao-rp2040"         if ARCH_BOARD_SEEED_XIAO_RP2040
 	default "adafruit-kb2040"           if ARCH_BOARD_ADAFRUIT_KB2040
 	default "adafruit-qt-py-rp2040"     if ARCH_BOARD_ADAFRUIT_QT_PY_RP2040
 	default "waveshare-rp2040-lcd-1.28" if ARCH_BOARD_WAVESHARE_RP2040_LCD_1_28
@@ -3232,6 +3291,8 @@ config ARCH_BOARD
 	default "rv32m1-vega"               if ARCH_BOARD_RV32M1_VEGA
 	default "rv-virt"                   if ARCH_BOARD_QEMU_RV_VIRT
 	default "star64"                    if ARCH_BOARD_JH7110_STAR64
+	default "canmv230"                  if ARCH_BOARD_K230_CANMV
+	default "ox64"                      if ARCH_BOARD_BL808_OX64
 	default "sabre-6quad"               if ARCH_BOARD_SABRE_6QUAD
 	default "qemu-armv7a"               if ARCH_BOARD_QEMU_ARMV7A
 	default "qemu-armv8a"               if ARCH_BOARD_QEMU_ARMV8A
@@ -3322,6 +3383,7 @@ config ARCH_BOARD
 	default "viewtool-stm32f107"        if ARCH_BOARD_VIEWTOOL_STM32F107
 	default "xmc4500-relax"             if ARCH_BOARD_XMC4500RELAX
 	default "xmc4700-relax"             if ARCH_BOARD_XMC4700RELAX
+	default "xmc4800-relax"             if ARCH_BOARD_XMC4800RELAX
 	default "verdin-mx8mp"              if ARCH_BOARD_VERDIN_MX8MP
 	default "z16f2800100zcog"           if ARCH_BOARD_Z16F2800100ZCOG
 	default "z20x"                      if ARCH_BOARD_Z20X
@@ -3338,7 +3400,7 @@ config ARCH_BOARD
 	default "xx3823"                    if ARCH_BOARD_XX3823
 	default "s698pm-dkit"               if ARCH_BOARD_S698PM_DKIT
 	default "hpm6750evk2"               if ARCH_BOARD_HPM6750EVK2
-	default "at32f437-mini"  	    	if ARCH_BOARD_AT32F437_MINI
+	default "at32f437-mini"             if ARCH_BOARD_AT32F437_MINI
 
 comment "Common Board Options"
 
@@ -3466,6 +3528,9 @@ source "boards/arm/imxrt/imxrt1060-evk/Kconfig"
 endif
 if ARCH_BOARD_IMXRT1064_EVK
 source "boards/arm/imxrt/imxrt1064-evk/Kconfig"
+endif
+if ARCH_BOARD_IMXRT1170_EVK
+source "boards/arm/imxrt/imxrt1170-evk/Kconfig"
 endif
 if ARCH_BOARD_TEENSY_4X
 source "boards/arm/imxrt/teensy-4.x/Kconfig"
@@ -3619,6 +3684,9 @@ source "boards/arm/rp2040/pimoroni-tiny2040/Kconfig"
 endif
 if ARCH_BOARD_ADAFRUIT_FEATHER_RP2040
 source "boards/arm/rp2040/adafruit-feather-rp2040/Kconfig"
+endif
+if ARCH_BOARD_SEEED_XIAO_RP2040
+source "boards/arm/rp2040/seeed-xiao-rp2040/Kconfig"
 endif
 if ARCH_BOARD_ADAFRUIT_KB2040
 source "boards/arm/rp2040/adafruit-kb2040/Kconfig"
@@ -3776,6 +3844,9 @@ endif
 if ARCH_BOARD_STM32H745I_DISCO
 source "boards/arm/stm32h7/stm32h745i-disco/Kconfig"
 endif
+if ARCH_BOARD_LINUM_STM32H753BI
+source "boards/arm/stm32h7/linum-stm32h753bi/Kconfig"
+endif
 if ARCH_BOARD_B_L475E_IOT01A
 source "boards/arm/stm32l4/b-l475e-iot01a/Kconfig"
 endif
@@ -3889,6 +3960,9 @@ source "boards/arm/stm32/nucleo-f429zi/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_L152RE
 source "boards/arm/stm32/nucleo-l152re/Kconfig"
+endif
+if ARCH_BOARD_ODRIVE36
+source "boards/arm/stm32/odrive36/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_STM32E407
 source "boards/arm/stm32/olimex-stm32-e407/Kconfig"
@@ -4019,6 +4093,9 @@ endif
 if ARCH_BOARD_XMC4700RELAX
 source "boards/arm/xmc4/xmc4700-relax/Kconfig"
 endif
+if ARCH_BOARD_XMC4800RELAX
+source "boards/arm/xmc4/xmc4800-relax/Kconfig"
+endif
 if ARCH_BOARD_VERDIN_MX8MP
 source "boards/arm/mx8mp/verdin-mx8mp/Kconfig"
 endif
@@ -4114,6 +4191,12 @@ source "boards/risc-v/qemu-rv/rv-virt/Kconfig"
 endif
 if ARCH_BOARD_JH7110_STAR64
 source "boards/risc-v/jh7110/star64/Kconfig"
+endif
+if ARCH_BOARD_K230_CANMV
+source "boards/risc-v/k230/canmv230/Kconfig"
+endif
+if ARCH_BOARD_BL808_OX64
+source "boards/risc-v/bl808/ox64/Kconfig"
 endif
 if ARCH_BOARD_ESP32C3_DEVKIT
 source "boards/risc-v/esp32c3/esp32c3-devkit/Kconfig"
@@ -4272,7 +4355,7 @@ config ARCH_BOARD_COMMON
 	bool "Board common logic"
 	default n
 	---help---
-		 Board common logic located in each board/common folder.
+		Board common logic located in each board/common folder.
 
 if ARCH_BOARD_COMMON
 if ARCH_CHIP_ESP32
@@ -4330,18 +4413,30 @@ config BOARD_CRASHDUMP
 		"machine state" in a place where on the next reset can write it
 		to more sophisticated storage in a sane operating environment.
 
-config BOARD_COREDUMP
-	bool "Enable Core Dump after assert"
+config BOARD_COREDUMP_SYSLOG
+	bool "Enable Core dump to syslog"
 	default n
 	depends on ELF_COREDUMP
 	---help---
-		Enable to support for the dump core information after assert.
+		Enable put coredump to syslog when crash.
 
-if BOARD_COREDUMP
+config BOARD_COREDUMP_BLKDEV
+	bool "Enable Core Dump to block device"
+	default n
+	depends on ELF_COREDUMP
+	---help---
+		Enable save coredump at block device when crash.
+
+config BOARD_COREDUMP_BLKDEV_PATH
+	string "Save Core Dump block device PATH"
+	depends on BOARD_COREDUMP_BLKDEV
+	---help---
+		Save coredump file block device path.
 
 config BOARD_COREDUMP_FULL
 	bool "Core Dump all thread registers and stacks"
 	default y
+	depends on BOARD_COREDUMP_SYSLOG || BOARD_COREDUMP_BLKDEV
 	---help---
 		Enable to support for the dump all task registers and stacks.
 
@@ -4349,10 +4444,9 @@ config BOARD_COREDUMP_COMPRESSION
 	bool "Enable Core Dump compression"
 	default y
 	select LIBC_LZF
+	depends on BOARD_COREDUMP_SYSLOG || BOARD_COREDUMP_BLKDEV
 	---help---
 		Enable LZF compression algorithm for core dump content
-
-endif # BOARD_COREDUMP
 
 config BOARD_ENTROPY_POOL
 	bool "Enable Board level storing of entropy pool structure"
@@ -4548,3 +4642,14 @@ config BOARD_USBDEV_SERIALSTR
 	default n
 	---help---
 		Use board unique serial number to iSerialNumber in the device descriptor.
+
+config BOARD_MEMORY_RANGE
+	string "Board memory range"
+	default ""
+	---help---
+		Memory range of board. format: <start>,<end>,<flags>,....
+		start: start address of memory range
+		end: end address of memory range
+		flags: Readable 0x1, writable 0x2, executable 0x4
+		example:0x1000,0x2000,0x1,0x2000,0x3000,0x3,0x3000,0x4000,0x7
+

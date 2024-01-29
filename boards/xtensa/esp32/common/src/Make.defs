@@ -92,7 +92,7 @@ ifeq ($(CONFIG_SENSORS_SHT3X),y)
   CSRCS += esp32_sht3x.c
 endif
 
-ifeq ($(CONFIG_SENSORS_MS5611),y)
+ifeq ($(CONFIG_SENSORS_MS56XX),y)
   CSRCS += esp32_ms5611.c
 endif
 
@@ -110,6 +110,10 @@ endif
 
 ifeq ($(CONFIG_LCD_BACKPACK),y)
   CSRCS += esp32_lcd_backpack.c
+endif
+
+ifeq ($(CONFIG_LCD_DEV),y)
+  CSRCS += esp32_backlight.c
 endif
 
 ifeq ($(CONFIG_LCD_ILI9341),y)

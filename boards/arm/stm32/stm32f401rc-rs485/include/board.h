@@ -36,9 +36,8 @@
 
 /* Clocking *****************************************************************/
 
-/* The STM32F401RC-RS485 supports both HSE and LSE crystals (X2 and X3).
- * However, as shipped, the X2 and X3 crystals are not populated.
- * Therefore the Nucleo-F401RE will need to run off the 16MHz HSI clock.
+/* The STM32F401RC-RS485 uses an external 32kHz cristal (X2) to enable HSE
+ * clock.
  *
  *   System Clock source           : PLL (HSI)
  *   SYSCLK(Hz)                    : 84000000     Determined by PLL
@@ -257,47 +256,31 @@ extern "C"
 
 /* Alternate function pin selections ****************************************/
 
-/* USART1:
- *   RXD: PA10  CN9 pin 3, CN10 pin 33
- *        PB7   CN7 pin 21
- *   TXD: PA9   CN5 pin 1, CN10 pin 21
- *        PB6   CN5 pin 3, CN10 pin 17
+/* USART2:
+ *   RXD: PA3   CN4 pin 20
+ *   TXD: PA2   CN4 pin 18
  */
 
-#if 1
-#  define GPIO_USART1_RX GPIO_USART1_RX_1    /* PA10 */
-#  define GPIO_USART1_TX GPIO_USART1_TX_1    /* PA9  */
-#else
-#  define GPIO_USART1_RX GPIO_USART1_RX_2    /* PB7 */
-#  define GPIO_USART1_TX GPIO_USART1_TX_2    /* PB6  */
+#ifdef CONFIG_USART2_RS485
+  /* Lets use for RS485 */
+
+#  define GPIO_USART2_TX        GPIO_USART2_TX_1 /* PA2 */
+#  define GPIO_USART2_RX        GPIO_USART2_RX_1 /* PA3 */
+
+  /* RS485 DIR pin: PA1 */
+
+#  define GPIO_USART2_RS485_DIR (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz |\
+                                 GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN1)
+
 #endif
 
-/* USART2:
- *   RXD: PA3   CN9 pin 1 (See SB13, 14, 62, 63). CN10 pin 37
- *        PD6
- *   TXD: PA2   CN9 pin 2(See SB13, 14, 62, 63). CN10 pin 35
- *        PD5
- */
-
-#define GPIO_USART2_RX   GPIO_USART2_RX_1    /* PA3 */
-#define GPIO_USART2_TX   GPIO_USART2_TX_1    /* PA2 */
-#define GPIO_USART2_RTS  GPIO_USART2_RTS_2
-#define GPIO_USART2_CTS  GPIO_USART2_CTS_2
-
 /* USART6:
- *  RXD: PC7    CN5 pin2, CN10 pin 19
- *       PA12   CN10, pin 12
- *  TXD: PC6    CN10, pin 4
- *       PA11   CN10, pin 14
+ *  RXD: PC7    CN2 pin 15
+ *  TXD: PC6    CN2 pin 17
  */
 
 #define GPIO_USART6_RX   GPIO_USART6_RX_1    /* PC7 */
 #define GPIO_USART6_TX   GPIO_USART6_TX_1    /* PC6 */
-
-/* UART RX DMA configurations */
-
-#define DMAMAP_USART1_RX DMAMAP_USART1_RX_2
-#define DMAMAP_USART6_RX DMAMAP_USART6_RX_2
 
 /* I2C
  *
@@ -307,18 +290,10 @@ extern "C"
  */
 
 #define GPIO_I2C1_SCL    GPIO_I2C1_SCL_2
-#define GPIO_I2C1_SDA    GPIO_I2C1_SDA_2
-#define GPIO_I2C1_SCL_GPIO \
-   (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN8)
-#define GPIO_I2C1_SDA_GPIO \
-   (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN9)
+#define GPIO_I2C1_SDA    GPIO_I2C1_SDA_1
 
 #define GPIO_I2C2_SCL    GPIO_I2C2_SCL_1
-#define GPIO_I2C2_SDA    GPIO_I2C2_SDA_1
-#define GPIO_I2C2_SCL_GPIO \
-   (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN10)
-#define GPIO_I2C2_SDA_GPIO \
-   (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN11)
+#define GPIO_I2C2_SDA    GPIO_I2C2_SDA_2
 
 /* SPI
  *
@@ -335,22 +310,26 @@ extern "C"
 
 /* LEDs
  *
- * The Nucleo F401RE and F411RE boards provide a single user LED, LD2.  LD2
- * is the green LED connected to Arduino signal D13 corresponding to MCU I/O
- * PA5 (pin 21) or PB13 (pin 34) depending on the STM32 target.
- *
+ * The STM32F401RC-RS485 boards provide 4 blue user LEDs. LD1, LD2, LD3
+ * and LD4 that are connected to MCU I/O pins PC0, PC1, PC2 and PC3.
  *   - When the I/O is HIGH value, the LED is on.
  *   - When the I/O is LOW, the LED is off.
  */
 
 /* LED index values for use with board_userled() */
 
-#define BOARD_LD2         0
-#define BOARD_NLEDS       1
+#define BOARD_LD1         0
+#define BOARD_LD2         1
+#define BOARD_LD3         2
+#define BOARD_LD4         3
+#define BOARD_NLEDS       4
 
 /* LED bits for use with board_userled_all() */
 
-#define BOARD_LD2_BIT     (1 << BOARD_LD2)
+#define BOARD_LED1_BIT    (1 << BOARD_LD1)
+#define BOARD_LED2_BIT    (1 << BOARD_LD2)
+#define BOARD_LED3_BIT    (1 << BOARD_LD3)
+#define BOARD_LED4_BIT    (1 << BOARD_LD4)
 
 /* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
  * defined.  In that case, the usage by the board port is defined in
@@ -384,16 +363,18 @@ extern "C"
 #define LED_PANIC        1
 
 /* Buttons
- *
- *   B1 USER:
- *   the user button is connected to the I/O PC13 (pin 2) of the STM32
- *   microcontroller.
+ *   The STM32F401RC-RS485 has 3 user buttons: SW3, SW4, and SW5.
+ *   They are connected to PB13, PB14, and PB15 respectively.
  */
 
-#define BUTTON_USER        0
-#define NUM_BUTTONS        1
+#define BUTTON_SW3         0
+#define BUTTON_SW4         1
+#define BUTTON_SW5         2
+#define NUM_BUTTONS        3
 
-#define BUTTON_USER_BIT    (1 << BUTTON_USER)
+#define BUTTON_SW3_BIT     (1 << BUTTON_SW3)
+#define BUTTON_SW4_BIT     (1 << BUTTON_SW4)
+#define BUTTON_SW5_BIT     (1 << BUTTON_SW5)
 
 #define GPIO_TIM2_CH1IN (GPIO_TIM2_CH1IN_1 | GPIO_PULLUP)
 #define GPIO_TIM2_CH2IN (GPIO_TIM2_CH2IN_1 | GPIO_PULLUP)
